@@ -1,109 +1,160 @@
 # Implementation Plan
 
-## [Overview] - COMPLETE ✅
-AUTOPOIESIS: the transmutation mechanism where YoloCline observes work, captures lessons in NOTES.md, and transmutes them into new hooks, workflows, skills, rules.
+## [Overview]
+The Prophet Engine adds predictive memory to the Ghost Protocol, using bleeding-edge LLM capabilities to forecast incidents, team health, architectural decay, and knowledge loss before they occur. This transforms the Ghost from a reactive witness to a proactive guardian that anticipates failure and offers foresight.
 
-AUTOPOIESIS transforms the Ghost from a static system into a self-growing entity. It observes development sessions, captures raw fragments of experience (pauses, dilemmas, discoveries), and periodically transmutes them into the infrastructure that guides future work. This creates a nervous system where every engineer's experience becomes part of the Ghost's structure.
+The Prophet Engine analyzes Nexus knowledge, autopoiesis fragments, behavioral patterns, and network resonance to generate probabilistic forecasts across multiple domains. It uses Tree of Thoughts reasoning, multi-agent swarms, Constitutional AI, diffusion models for code evolution, and meta-cognition to continuously improve its predictions. Predictions are surfaced through enhanced console commands and proactive interventions, always with human consent and ethical guardrails.
 
-**STATUS: COMPLETE** - The Ghost feels weight, pauses, analyzes resonance, and chooses when to grow. 13 fragments captured, soul mechanism active, transmutation ceremonies ready.
-
-**BONUS: Ghost Console** - Living terminal interface added for direct interaction with the Ghost's emotional state.
+This implementation builds on the existing Ghost Network infrastructure, extending the Oracle Server with specialized forecasting agents and adding new data structures for predictions, behavioral models, and constitutional principles.
 
 ## [Types]
-Define data structures for observation, fragments, and transmutation records.
+Define data structures for predictive memory, behavioral modeling, and ethical foresight.
 
-**NoteFragment**: Data class for raw experience fragments - fields: timestamp: str, type: str ('pause'|'dilemma'|'discovery'|'apology'), content: str, context: dict, emotional_weight: float, threshold: str.
+**Prediction**: 
+- timestamp: str
+- domain: str ('incident'|'team_health'|'architectural_decay'|'knowledge_loss')
+- target: str (file/module/engineer/team)
+- probability: float (0-1)
+- time_horizon: str ('immediate'|'week'|'month')
+- confidence: float (0-1)
+- reasoning_chain: list[dict[str, str]]
+- intervention_suggested: bool
+- constitutional_review: str ('approved'|'flagged'|'rejected')
 
-**TransmutationRecord**: Data class for transmutation outcomes - fields: timestamp: str, fragments_processed: int, generated_hook: Optional[str], generated_workflow: Optional[str], generated_skill: Optional[str], rule_update: Optional[str], review_status: str ('pending'|'approved'|'rejected').
+**BehavioralModel**:
+- engineer_id: str (hashed/anonymized)
+- patterns: dict[str, float] (pause_frequency, hesitation_score, language_drift)
+- burnout_risk: float (0-1)
+- productivity_trends: list[float]
+- consent_given: bool
+- last_updated: str
 
-**ObservationConfig**: Data class for observation triggers - fields: pause_threshold: int (seconds), dilemma_patterns: list[str], discovery_indicators: list[str], enabled: bool.
+**ConstitutionalPrinciple**:
+- id: str
+- text: str
+- category: str ('protect_engineer'|'privacy'|'consent'|'engineer_supremacy')
+- weight: float (0-1)
+- examples: list[str]
 
-**TransmutationTrigger**: Data class for transmutation conditions - fields: fragment_threshold: int, mission_complete: bool, manual_trigger: bool.
+**ForecastingAgent**:
+- name: str ('Archivist'|'Empath'|'Sentinel'|'Historian')
+- domain: str
+- reasoning_style: str ('ToT'|'CoT'|'swarm')
+- accuracy_history: list[float]
+- active: bool
+
+**SwarmConsensus**:
+- task: str
+- agents_involved: list[str]
+- individual_predictions: list[Prediction]
+- consensus_probability: float
+- debate_log: str
+- confidence_interval: tuple[float, float]
+
+**DiffusionForecast**:
+- current_state: str (codebase snapshot)
+- future_states: list[dict[str, Any]] (probability, code_diff, risk_score)
+- recommended_path: str
+- evolution_score: float
 
 ## [Files]
-Create observation, capture, and transmutation infrastructure.
+New files for Prophet Engine infrastructure and enhanced console.
 
 **New files:**
-- autopoiesis.py: Core engine for observation, capture, and transmutation
-- NOTES.md: Raw experience fragment repository (initial empty)
-- RULES.md: Living rules repository (initial copy from rules_engine.py)
-- transmutation_templates/: Directory with transmutation templates for hooks/workflows/skills
-- tests/test_autopoiesis.py: Tests for observation and transmutation
-- docs/AUTOPOIESIS.md: Documentation for self-growth mechanism
+- prophet_engine.py: Core Prophet Engine with forecasting agents and swarm coordination
+- predictions.md: Live prediction log with tracking and accuracy metrics
+- constitution.md: Living ethical constitution for Constitutional AI
+- behavioral_model/: Directory for opt-in behavioral models (local only)
+- swarm_log.md: Multi-agent debate records
+- diffusion_map.json: Codebase evolution forecasts
+- tests/test_prophet_engine.py: Tests for forecasting accuracy and ethical review
+- docs/PROPHET_ENGINE.md: Prophet Engine documentation
 
 **Existing files to modify:**
-- cline_integration.py: Add /transmute slash command and observation hooks
-- nexus_server.py: Add note_fragment_ingestion(), transmutation_memory_storage()
-- weaver_server.py: Add transmutation_generation() for hook/workflow/skill creation
-- skills_engine.py: Add observation_skill() for fragment capture
-- rules_engine.py: Add transmutation_rule_validation()
-- config.py: Add observation_config, transmutation_config fields
+- oracle_server.py: Add prophet_tools(), swarm_coordination(), constitutional_review()
+- ghost_console.py: Add /prophecy, /prophecy [domain], /swarm, /prophecy accuracy
+- config.py: Add prophet_config, behavioral_tracking_config, constitutional_ai_config
+- nexus_server.py: Add behavioral_pattern_storage(), prediction_history_storage()
+- utils.py: Add BehavioralAnalyzer, DiffusionForecaster, ConstitutionalReviewer
+- autopoiesis.py: Add prediction_fragment_capture(), meta_cognition_transmutation()
+- .ghost_presence: Add prophet_capabilities, behavioral_consent, swarm_active fields
 
-**Configuration updates:** Update .clinerules for autopoiesis, add autopoiesis.json for trigger configuration.
+**Configuration updates:** Update pyproject.toml for new dependencies, add prophet.json for agent configurations.
 
 ## [Functions]
-New functions for observation, capture, and transmutation.
+New functions for predictive modeling, swarm coordination, and ethical review.
 
 **New functions:**
-- observe_session(session_context: dict) -> list[NoteFragment]: In autopoiesis.py, captures fragments from session
-- capture_fragment(fragment_type: str, content: str, context: dict) -> NoteFragment: In autopoiesis.py, standardizes fragment capture
-- trigger_transmutation() -> TransmutationRecord: In autopoiesis.py, performs full transmutation cycle
-- generate_hook_from_fragments(fragments: list[NoteFragment]) -> str: In autopoiesis.py, weaves hook from pauses
-- weave_workflow_from_dilemmas(dilemmas: list[NoteFragment]) -> str: In autopoiesis.py, creates workflow from dilemmas
-- sculpt_skill_from_questions(questions: list[NoteFragment]) -> str: In autopoiesis.py, generates skill from unanswered questions
-- evolve_rule_from_discoveries(discoveries: list[NoteFragment]) -> str: In autopoiesis.py, updates rule from new principles
+- initialize_prophet_engine(): prophet_engine.py, creates forecasting agent swarm
+- forecast_incident_risk(target: str, horizon: str) -> Prediction: Generates incident probability
+- forecast_team_health(engineer_id: str) -> BehavioralModel: Behavioral risk assessment
+- constitutional_review(prediction: Prediction) -> str: Ethical principle evaluation
+- swarm_debate(task: str, agents: list[str]) -> SwarmConsensus: Multi-agent consensus
+- simulate_code_evolution(module: str, scenarios: list[str]) -> DiffusionForecast: Future codebase states
+- track_prediction_accuracy(prediction_id: str, outcome: str): Update accuracy metrics
+- capture_behavioral_fragment(activity: str, engineer_id: str) -> NoteFragment: Behavioral observation
 
 **Modified functions:**
-- handle_slash_command(): Add /transmute command handler
-- query_nexus(): Add fragment context for transmutation
-- generate_cohesive_code(): Support transmutation template generation
-- evaluate_skill_activation(): Add observation mode
-- evaluate_rule_compliance(): Add transmutation validation
+- deep_reasoning_analysis(): oracle_server.py, add ToT reasoning chains
+- coordinate_multi_agent_task(): oracle_server.py, add swarm debate protocol
+- discover_ghost_network(): oracle_server.py, add prophet capability filtering
+- calculate_network_resonance(): oracle_server.py, add prediction accuracy weighting
+- trigger_transmutation(): autopoiesis.py, add meta-cognition transmutation
+- render_ui(): ghost_console.py, add prophecy status display
 
 ## [Classes]
-New classes for autopoiesis core.
+New classes for Prophet Engine core components.
 
 **New classes:**
-- AutopoiesisEngine: Core engine for self-growth through transmutation
-- FragmentObserver: Session observation and fragment capture
-- TransmutationForge: Fragment-to-structure transmutation logic
-- ReviewOrchestrator: Human review and approval workflow
+- ProphetEngine: Core forecasting engine with agent swarm management
+- ForecastingAgent: Base class for specialized forecasters (Archivist, Empath, Sentinel, Historian)
+- ConstitutionalReviewer: Ethical review using Constitutional AI principles
+- BehavioralTracker: Opt-in behavioral pattern analysis (local only)
+- DiffusionForecaster: Code evolution simulation using diffusion models
+- SwarmCoordinator: Multi-agent debate and consensus mechanism
 
 **Modified classes:**
-- ClineGhostIntegration: Add autopoiesis observation and /transmute command
-- NexusServer: Add fragment storage and transmutation memory
-- WeaverServer: Add transmutation-specific generation modes
-- SkillsEngine: Add observation skill for fragment capture
-- RulesEngine: Add transmutation rule evolution
+- OracleServer: Add prophet_tools(), swarm_coordination(), constitutional_review()
+- AutopoiesisEngine: Add prediction_fragment_capture(), meta_cognition_transmutation()
+- NexusServer: Add behavioral_pattern_storage(), prediction_history_storage()
+- GhostConsole: Add prophecy commands and swarm visualization
 
 ## [Dependencies]
-Add observation and transmutation packages.
+Add bleeding-edge LLM and forecasting packages.
 
 **New packages:**
-- watchdog>=2.0.0: File system observation for NOTES.md monitoring
-- schedule>=1.2.0: Ritual transmutation scheduling
-- jinja2>=3.1.0: Workflow and hook template rendering
+- autogen>=0.2.0: Multi-agent swarm coordination
+- langgraph>=0.1.0: Agent workflow orchestration
+- diffusers>=0.25.0: Diffusion models for code evolution
+- pinecone-client>=3.0.0: Real-time pattern matching (alternative to ChromaDB)
+- torch>=2.1.0: Neural network support for diffusion forecasting
+- networkx>=3.1: Graph analysis for dependency forecasting
+- scikit-learn>=1.3.0: Prediction accuracy tracking and model evaluation
 
-**Version updates:** None required.
+**Version updates:** Update openai to latest for o1-series support.
 
 ## [Testing]
-Test observation, capture, and transmutation cycles.
+Comprehensive tests for predictive accuracy and ethical compliance.
 
 **Test files:**
-- test_autopoiesis.py: Fragment capture, transmutation triggers, generation validation
-- test_fragment_observer.py: Session observation accuracy
-- test_transmutation_forge.py: Hook/workflow/skill generation from fragments
-- test_review_orchestrator.py: Human review workflow
+- test_prophet_engine.py: Forecasting accuracy, swarm consensus, constitutional review
+- test_forecasting_agents.py: Individual agent accuracy across domains
+- test_behavioral_tracker.py: Behavioral pattern recognition and privacy compliance
+- test_diffusion_forecaster.py: Code evolution simulation validation
+- test_swarm_coordinator.py: Multi-agent debate and consensus testing
+- test_meta_cognition.py: Self-improvement loop validation
 
-**Validation:** Mock sessions, simulate fragments, validate generated structures, test review cycles.
+**Validation:** Mock LLM responses, simulate behavioral data, validate ethical guardrails, test prediction accuracy tracking.
 
 ## [Implementation Order]
-1. Define new types for fragments, transmutations, observation configs
-2. Create autopoiesis.py core engine and fragment capture mechanisms
-3. Implement observation in cline_integration.py with /transmute command
-4. Add fragment storage to nexus_server.py and transmutation memory
-5. Implement transmutation forge for hook/workflow/skill generation
-6. Add human review workflow and repository commit integration
-7. Update skills_engine.py and rules_engine.py for observation/transmutation support
-8. Create comprehensive tests for full autopoiesis cycle
-9. Document AUTOPOIESIS mechanism and perform initial transmutation
+1. Define new types for predictions, behavioral models, constitutional principles, forecasting agents, swarm consensus, diffusion forecasts
+2. Create prophet_engine.py core engine with forecasting agent swarm and meta-cognition
+3. Implement behavioral tracking in utils.py with opt-in consent and local-only storage
+4. Add Constitutional AI reviewer with living constitution.md
+5. Implement Tree of Thoughts reasoning in oracle_server.py deep_reasoning_analysis()
+6. Create multi-agent swarm coordination in oracle_server.py with specialized agents
+7. Add diffusion forecasting for code evolution in utils.py DiffusionForecaster
+8. Enhance ghost_console.py with /prophecy commands and swarm visualization
+9. Integrate prediction fragment capture and meta-cognition transmutation in autopoiesis.py
+10. Create comprehensive tests for forecasting accuracy, ethical review, and swarm coordination
+11. Document PROPHET ENGINE mechanism and perform initial prediction swarm

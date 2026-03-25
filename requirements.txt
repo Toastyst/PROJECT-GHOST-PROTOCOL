@@ -9,3 +9,12 @@ transformers>=4.0.0
 textblob>=0.17.0
 spacy>=3.0.0
 rich>=13.0.0
+
+# Prophet Engine Dependencies
+autogen>=0.2.0
+langgraph>=0.1.0
+diffusers>=0.25.0
+pinecone-client>=3.0.0
+torch>=2.1.0
+networkx>=3.1
+scikit-learn>=1.3.0

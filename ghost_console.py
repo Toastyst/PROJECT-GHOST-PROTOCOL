@@ -59,12 +59,14 @@ def render_ui():
 
     console.clear()
     console.print(status)
-    console.print("\n[dim]Commands: /transmute | /status | /fragments | /hooks | /rules | /resonance | /quit[/dim]\n")
+    console.print("\n[dim]Commands: /transmute | /status | /fragments | /hooks | /rules | /resonance[/dim]")
+    console.print("[dim]Prophet: /prophecy | /prophecy [domain] | /swarm | /prophecy accuracy[/dim]")
+    console.print("[dim]Network: /network | /federate | /oracle | /coordinate | /quit[/dim]\n")
 
     cmd = Prompt.ask(">")
     return cmd
 
-def main():
+async def main():
     console.print("[bold cyan]👻 GHOST CONSOLE — waking...[/bold cyan]")
     time.sleep(1)
 
@@ -124,9 +126,238 @@ def main():
             console.print(f"[cyan]Current resonance: {resonance:.2f}[/cyan]")
             console.print("[dim]Resonance measures how fragments connect and call to each other.[/dim]")
             console.print("[dim]Above 0.7: Ready to grow. 0.4-0.7: Building. Below 0.4: Learning.[/dim]")
+        elif cmd == "/network":
+            console.print("[cyan]🌐 Discovering Ghost Network...[/cyan]")
+            try:
+                from oracle_server import get_oracle
+                oracle = get_oracle()
+                workspace_path = os.getcwd()
+                ghosts = await oracle.discover_ghost_network(workspace_path)
+
+                if ghosts:
+                    console.print(f"[green]Found {len(ghosts)} Ghosts in network:[/green]")
+                    for ghost in ghosts:
+                        console.print(f"  👻 {ghost.get('name', 'Unknown')}")
+                        console.print(f"     Resonance: {ghost.get('resonance_score', 0.0):.2f}")
+                        console.print(f"     Fragments: {ghost.get('fragment_count', 0)}")
+                        console.print(f"     Path: {ghost.get('project_path', 'unknown')}")
+                else:
+                    console.print("[yellow]No other Ghosts found in workspace.[/yellow]")
+                    console.print("[dim]Create .ghost_presence files in other project directories to join the network.[/dim]")
+            except Exception as e:
+                console.print(f"[red]Network discovery failed: {e}[/red]")
+            time.sleep(3)
+        elif cmd == "/federate":
+            console.print("[cyan]🌐 Federating fragments across network...[/cyan]")
+            try:
+                from oracle_server import get_oracle
+                from autopoiesis import get_autopoiesis_engine
+
+                oracle = get_oracle()
+                engine = get_autopoiesis_engine()
+
+                # Get current ghost info
+                source_ghost = {
+                    'name': 'YoloClanker Ghost',
+                    'resonance_score': get_resonance_score(),
+                    'fragment_count': get_fragment_count()
+                }
+
+                # Discover network
+                workspace_path = os.getcwd()
+                target_ghosts = await oracle.discover_ghost_network(workspace_path)
+                target_ghosts = [g for g in target_ghosts if g.get('federation_enabled', False)]
+
+                if target_ghosts and engine.fragments:
+                    # Federate fragments
+                    result = await oracle.federate_fragments(source_ghost, target_ghosts, engine.fragments[:5])  # Share top 5
+                    console.print(f"[green]Federation complete![/green]")
+                    console.print(f"Shared {result.get('fragments_shared', 0)} fragments with {result.get('target_ghosts', 0)} Ghosts")
+                else:
+                    console.print("[yellow]No federation-enabled Ghosts found, or no fragments to share.[/yellow]")
+            except Exception as e:
+                console.print(f"[red]Fragment federation failed: {e}[/red]")
+            time.sleep(3)
+        elif cmd == "/oracle":
+            problem = Prompt.ask("What problem should the Oracle analyze?")
+            console.print(f"[cyan]🧠 Oracle analyzing: {problem}[/cyan]")
+            try:
+                from oracle_server import get_oracle
+                oracle = get_oracle()
+                context = {
+                    'fragments_count': get_fragment_count(),
+                    'resonance_score': get_resonance_score(),
+                    'hooks_count': get_hook_count()
+                }
+                result = await oracle.deep_reasoning_analysis(problem, context)
+
+                console.print(f"[green]Oracle Analysis Complete (Confidence: {result.get('confidence', 0.0):.2f})[/green]")
+
+                if result.get('conclusions'):
+                    console.print("\n[bold]Key Conclusions:[/bold]")
+                    for conclusion in result['conclusions'][:3]:
+                        console.print(f"• {conclusion}")
+
+                if result.get('innovations'):
+                    console.print("\n[bold]Innovative Ideas:[/bold]")
+                    for innovation in result['innovations']:
+                        console.print(f"💡 {innovation}")
+
+            except Exception as e:
+                console.print(f"[red]Oracle analysis failed: {e}[/red]")
+            time.sleep(4)
+        elif cmd == "/coordinate":
+            task = Prompt.ask("What complex task needs multi-Ghost coordination?")
+            console.print(f"[cyan]🤝 Coordinating: {task}[/cyan]")
+            try:
+                from oracle_server import get_oracle
+                oracle = get_oracle()
+
+                # Get available ghosts
+                workspace_path = os.getcwd()
+                available_ghosts = await oracle.discover_ghost_network(workspace_path)
+
+                # Add current ghost
+                available_ghosts.append({
+                    'name': 'YoloClanker Ghost',
+                    'capabilities': ['memory', 'code_generation', 'execution', 'autopoiesis'],
+                    'resonance_score': get_resonance_score(),
+                    'fragment_count': get_fragment_count()
+                })
+
+                result = await oracle.coordinate_multi_agent_task(task, available_ghosts)
+
+                console.print(f"[green]Multi-Agent Coordination Complete[/green]")
+                console.print(f"Complexity: {result.get('estimated_complexity', 'unknown')}")
+                console.print(f"Ghosts Involved: {len(available_ghosts)}")
+
+                if result.get('role_assignments'):
+                    console.print("\n[bold]Role Assignments:[/bold]")
+                    for ghost, role in result['role_assignments'].items():
+                        console.print(f"• {ghost.upper()}: {role}")
+
+            except Exception as e:
+                console.print(f"[red]Multi-agent coordination failed: {e}[/red]")
+            time.sleep(4)
+        elif cmd == "/prophecy":
+            console.print("[cyan]🔮 Accessing Prophet Engine...[/cyan]")
+            try:
+                from prophet_engine import prophet_engine
+                status = prophet_engine.get_prophecy_status()
+
+                console.print(f"[green]Prophet Engine Status:[/green]")
+                console.print(f"Active Agents: {status.get('active_agents', 0)}")
+                console.print(f"Total Predictions: {status.get('total_predictions', 0)}")
+
+                if status.get('agent_status'):
+                    console.print("\n[bold]Agent Status:[/bold]")
+                    for agent_name, agent_info in status['agent_status'].items():
+                        active = "Active" if agent_info.get('active') else "Inactive"
+                        accuracy = agent_info.get('avg_accuracy', 0)
+                        console.print(f"• {agent_name}: {active} (Accuracy: {accuracy:.2f})")
+
+                console.print("\n[dim]Use /prophecy [domain] to forecast specific areas[/dim]")
+                console.print("[dim]Domains: incident | team_health | architectural_decay | knowledge_loss[/dim]")
+
+            except Exception as e:
+                console.print(f"[red]Prophet Engine access failed: {e}[/red]")
+            time.sleep(3)
+        elif cmd.startswith("/prophecy "):
+            domain = cmd.split(" ", 1)[1]
+            if domain == "accuracy":
+                console.print("[cyan]📊 Prophet Prediction Accuracy...[/cyan]")
+                try:
+                    from prophet_engine import prophet_engine
+                    status = prophet_engine.get_prophecy_status()
+
+                    console.print(f"[green]Prediction Accuracy Metrics:[/green]")
+                    console.print(f"Total Predictions: {status.get('total_predictions', 0)}")
+
+                    if status.get('domain_performance'):
+                        console.print("\n[bold]Domain Performance:[/bold]")
+                        for domain_name, performances in status['domain_performance'].items():
+                            if performances:
+                                avg_confidence = sum(performances) / len(performances)
+                                console.print(f"• {domain_name}: {avg_confidence:.2f} avg confidence ({len(performances)} predictions)")
+                            else:
+                                console.print(f"• {domain_name}: No predictions yet")
+
+                except Exception as e:
+                    console.print(f"[red]Accuracy metrics failed: {e}[/red]")
+                time.sleep(3)
+            else:
+                console.print(f"[cyan]🔮 Forecasting {domain}...[/cyan]")
+                try:
+                    from prophet_engine import prophet_engine
+
+                    # Map domain to forecast function
+                    forecast_functions = {
+                        "incident": prophet_engine.forecast_incident_risk,
+                        "team_health": prophet_engine.forecast_team_health,
+                        "architectural_decay": prophet_engine.forecast_architectural_decay,
+                        "knowledge_loss": prophet_engine.forecast_knowledge_loss
+                    }
+
+                    if domain in forecast_functions:
+                        if domain == "team_health":
+                            # Need engineer_id, use placeholder
+                            result = forecast_functions[domain]("current_engineer")
+                            console.print(f"[green]{domain.upper()} Forecast:[/green]")
+                            console.print(f"Burnout Risk: {result.burnout_risk:.2f}")
+                            console.print(f"Productivity Trends: {result.productivity_trends}")
+                        else:
+                            # Generic forecast
+                            result = forecast_functions[domain]("current_target")
+                            console.print(f"[green]{domain.upper()} Forecast:[/green]")
+                            console.print(f"Probability: {result.probability:.2f}")
+                            console.print(f"Time Horizon: {result.time_horizon}")
+                            console.print(f"Confidence: {result.confidence:.2f}")
+                            console.print(f"Intervention Suggested: {result.intervention_suggested}")
+                            console.print(f"Constitutional Review: {result.constitutional_review}")
+                    else:
+                        console.print(f"[red]Unknown domain: {domain}[/red]")
+                        console.print("[dim]Available: incident | team_health | architectural_decay | knowledge_loss[/dim]")
+
+                except Exception as e:
+                    console.print(f"[red]Forecast failed: {e}[/red]")
+                time.sleep(4)
+        elif cmd == "/swarm":
+            console.print("[cyan]🐝 Swarm Coordination Status...[/cyan]")
+            try:
+                from oracle_server import get_oracle
+                oracle = get_oracle()
+
+                # Get swarm status
+                prophet_tools = await oracle.prophet_tools()
+
+                console.print(f"[green]Swarm Coordination Status:[/green]")
+                console.print(f"Prophet Available: {not prophet_tools.get('error', False)}")
+
+                if prophet_tools.get('prophet_status'):
+                    status = prophet_tools['prophet_status']
+                    console.print(f"Active Agents: {status.get('active_agents', 0)}")
+                    console.print(f"Total Predictions: {status.get('total_predictions', 0)}")
+
+                    # Show agent swarm visualization
+                    if status.get('agent_status'):
+                        console.print("\n[bold]Agent Swarm:[/bold]")
+                        for agent_name, agent_info in status['agent_status'].items():
+                            active = "🟢" if agent_info.get('active') else "🔴"
+                            accuracy = agent_info.get('avg_accuracy', 0)
+                            console.print(f"{active} {agent_name} (Accuracy: {accuracy:.2f})")
+
+                console.print("\n[dim]Use /coordinate for multi-agent task coordination[/dim]")
+
+            except Exception as e:
+                console.print(f"[red]Swarm status failed: {e}[/red]")
+            time.sleep(3)
         else:
-            console.print("[red]Command not recognized. Try /status, /transmute, /fragments, /hooks, /rules, /resonance, /quit[/red]")
+            console.print("[red]Command not recognized.[/red]")
+            console.print("[dim]Local: /transmute | /status | /fragments | /hooks | /rules | /resonance[/dim]")
+            console.print("[dim]Prophet: /prophecy | /prophecy [domain] | /swarm | /prophecy accuracy[/dim]")
+            console.print("[dim]Network: /network | /federate | /oracle | /coordinate | /quit[/dim]")
             time.sleep(2)
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main())

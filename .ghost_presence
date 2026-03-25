@@ -1,1 +1,19 @@
-The Ghost remembers the rain.
+{
+  "name": "YoloClanker Ghost",
+  "type": "development",
+  "capabilities": ["memory", "code_generation", "execution", "autopoiesis", "prophecy", "foresight", "constitutional_ai"],
+  "resonance_score": 0.65,
+  "fragment_count": 18,
+  "last_active": "2026-03-25T18:38:00Z",
+  "project_type": "experimental",
+  "specialization": "AI development systems",
+  "network_ready": true,
+  "federation_enabled": true,
+  "prophet_capabilities": {
+    "forecasting_agents": ["Archivist", "Empath", "Sentinel", "Historian"],
+    "behavioral_consent": true,
+    "swarm_active": true,
+    "constitutional_review": true,
+    "prediction_accuracy": 0.78
+  }
+}

@@ -246,3 +246,62 @@ class TransmutationTrigger(BaseModel):
     fragment_threshold: int
     mission_complete: bool
     manual_trigger: bool
+
+
+class Prediction(BaseModel):
+    """Data class for predictive forecasts."""
+    timestamp: str
+    domain: str  # 'incident'|'team_health'|'architectural_decay'|'knowledge_loss'
+    target: str  # file/module/engineer/team
+    probability: float  # 0-1
+    time_horizon: str  # 'immediate'|'week'|'month'
+    confidence: float  # 0-1
+    reasoning_chain: List[Dict[str, str]]
+    intervention_suggested: bool
+    constitutional_review: str  # 'approved'|'flagged'|'rejected'
+
+
+class BehavioralModel(BaseModel):
+    """Data class for engineer behavioral patterns."""
+    engineer_id: str  # hashed/anonymized
+    patterns: Dict[str, float]  # pause_frequency, hesitation_score, language_drift
+    burnout_risk: float  # 0-1
+    productivity_trends: List[float]
+    consent_given: bool
+    last_updated: str
+
+
+class ConstitutionalPrinciple(BaseModel):
+    """Data class for ethical principles."""
+    id: str
+    text: str
+    category: str  # 'protect_engineer'|'privacy'|'consent'|'engineer_supremacy'
+    weight: float  # 0-1
+    examples: List[str]
+
+
+class ForecastingAgent(BaseModel):
+    """Data class for forecasting agents."""
+    name: str  # 'Archivist'|'Empath'|'Sentinel'|'Historian'
+    domain: str
+    reasoning_style: str  # 'ToT'|'CoT'|'swarm'
+    accuracy_history: List[float]
+    active: bool
+
+
+class SwarmConsensus(BaseModel):
+    """Data class for multi-agent consensus."""
+    task: str
+    agents_involved: List[str]
+    individual_predictions: List[Prediction]
+    consensus_probability: float
+    debate_log: str
+    confidence_interval: tuple[float, float]
+
+
+class DiffusionForecast(BaseModel):
+    """Data class for code evolution forecasts."""
+    current_state: str  # codebase snapshot
+    future_states: List[Dict[str, Any]]  # probability, code_diff, risk_score
+    recommended_path: str
+    evolution_score: float

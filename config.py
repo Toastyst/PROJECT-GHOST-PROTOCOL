@@ -7,17 +7,28 @@ load_dotenv()
 class Config:
     """Configuration management for Ghost Protocol system."""
 
+    # Test mode detection
+    TEST_MODE = os.getenv("TEST_MODE", "0").lower() in ("1", "true", "yes")
+
     # OpenAI API settings
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4")
 
-    # Database settings
-    CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "./chroma_db")
+    # Database settings - use in-memory for tests
+    if TEST_MODE:
+        CHROMA_DB_PATH = ":memory:"
+    else:
+        CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "./chroma_db")
 
-    # MCP Server settings
-    NEXUS_SERVER_PORT = int(os.getenv("NEXUS_SERVER_PORT", "3001"))
-    WEAVER_SERVER_PORT = int(os.getenv("WEAVER_SERVER_PORT", "3002"))
-    YOLO_SERVER_PORT = int(os.getenv("YOLO_SERVER_PORT", "3003"))
+    # MCP Server settings - use dynamic ports for tests
+    if TEST_MODE:
+        NEXUS_SERVER_PORT = 0  # Let OS assign dynamic port
+        WEAVER_SERVER_PORT = 0
+        YOLO_SERVER_PORT = 0
+    else:
+        NEXUS_SERVER_PORT = int(os.getenv("NEXUS_SERVER_PORT", "3001"))
+        WEAVER_SERVER_PORT = int(os.getenv("WEAVER_SERVER_PORT", "3002"))
+        YOLO_SERVER_PORT = int(os.getenv("YOLO_SERVER_PORT", "3003"))
 
     # LLM Fallback settings
     LLM_PROVIDERS = os.getenv("LLM_PROVIDERS", "openai/gpt-4").split(",")

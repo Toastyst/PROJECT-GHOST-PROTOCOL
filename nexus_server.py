@@ -20,12 +20,53 @@ from models import NexusData, EmotionalEntry, NoteFragment, TransmutationRecord
 from utils import GitUtils, CodeAnalyzer, LLMUtils
 from config import Config
 
+# Cross-platform lock mechanism
+def check_existing_instance(lock_file: str) -> bool:
+    """Check if another instance is already running."""
+    if not os.path.exists(lock_file):
+        return False
+
+    try:
+        with open(lock_file, 'r') as f:
+            pid_str = f.read().strip()
+            pid = int(pid_str)
+
+        # Check if process is still running (cross-platform)
+        try:
+            import psutil
+            if psutil.pid_exists(pid):
+                return True
+        except ImportError:
+            # psutil not available, use basic check
+            try:
+                os.kill(pid, 0)  # Signal 0 just checks if process exists
+                return True
+            except (OSError, ProcessLookupError):
+                pass  # Process doesn't exist
+
+    except (ValueError, IOError):
+        pass  # Invalid lock file
+
+    # Clean up stale lock file
+    try:
+        os.remove(lock_file)
+    except OSError:
+        pass
+
+    return False
+
 
 class KnowledgeBase:
     """Vector database wrapper for knowledge storage and retrieval."""
 
     def __init__(self, db_path: str = Config.CHROMA_DB_PATH):
-        self.client = chromadb.PersistentClient(path=db_path)
+        if Config.TEST_MODE and db_path == ":memory:":
+            # Use in-memory client for tests
+            self.client = chromadb.Client(Settings(anonymized_telemetry=False))
+        else:
+            # Use persistent client for production
+            self.client = chromadb.PersistentClient(path=db_path)
+
         self.collection = self.client.get_or_create_collection(
             name="nexus_knowledge",
             metadata={"description": "Codebase knowledge and insights"}
@@ -941,6 +982,22 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
 async def main():
     """Main server entry point."""
+    # Prevent multiple instances in production
+    if not Config.TEST_MODE:
+        lock_file = ".ghost_nexus.lock"
+        if check_existing_instance(lock_file):
+            print("Another Nexus server instance is already running. Exiting.")
+            return
+
+        # Write our PID to the lock file
+        try:
+            with open(lock_file, 'w') as f:
+                f.write(str(os.getpid()))
+            print("Nexus server lock acquired - starting...")
+        except IOError:
+            print("Failed to create lock file. Exiting.")
+            return
+
     import mcp.server.stdio
     await mcp.server.stdio.serve(server)
 

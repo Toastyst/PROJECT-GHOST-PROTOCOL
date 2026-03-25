@@ -374,6 +374,115 @@ class AutopoiesisEngine:
         self._write_fragment_to_notes(fragment)
         return fragment
 
+    def prediction_fragment_capture(self, prediction_data: Dict[str, Any]) -> Optional[NoteFragment]:
+        """Capture fragments from Prophet Engine predictions for meta-cognition."""
+        try:
+            # Extract prediction insights
+            domain = prediction_data.get('domain', 'unknown')
+            probability = prediction_data.get('probability', 0.5)
+            confidence = prediction_data.get('confidence', 0.5)
+            reasoning_chain = prediction_data.get('reasoning_chain', [])
+
+            # Create prediction fragment
+            content = f"Prophet prediction: {domain} risk {probability:.2f} (confidence: {confidence:.2f})"
+            if reasoning_chain:
+                content += f"\nReasoning: {reasoning_chain[0].get('analysis', '')[:200]}..."
+
+            fragment = NoteFragment(
+                timestamp=datetime.now().isoformat(),
+                type="prediction",
+                content=content,
+                context={
+                    "source": "prophet_engine",
+                    "domain": domain,
+                    "probability": probability,
+                    "confidence": confidence,
+                    "reasoning_steps": len(reasoning_chain)
+                },
+                emotional_weight=min(confidence * probability, 1.0),  # Weight by prediction strength
+                threshold="prophet_prediction"
+            )
+
+            self.fragments.append(fragment)
+            self._write_fragment_to_notes(fragment)
+            return fragment
+
+        except Exception as e:
+            print(f"Error capturing prediction fragment: {e}")
+            return None
+
+    def meta_cognition_transmutation(self) -> Optional[TransmutationRecord]:
+        """Perform meta-cognition enhanced transmutation using Prophet insights."""
+        try:
+            from prophet_engine import prophet_engine
+
+            # Get meta-cognition data from Prophet Engine
+            meta_data = prophet_engine.meta_cognition_data
+
+            if not meta_data.get('total_predictions', 0):
+                # No meta-cognition data yet, fall back to regular transmutation
+                return self.trigger_transmutation()
+
+            # Analyze prediction accuracy trends
+            accuracy_trends = meta_data.get('accuracy_trends', [])
+            domain_performance = meta_data.get('domain_performance', {})
+
+            # Use meta-cognition to improve transmutation decisions
+            transmutation_confidence = self._calculate_transmutation_confidence(meta_data)
+
+            if transmutation_confidence < 0.6:
+                # Low confidence, delay transmutation
+                return TransmutationRecord(
+                    timestamp=datetime.now().isoformat(),
+                    fragments_processed=len(self.fragments),
+                    review_status="meta_cognition_delay",
+                    generated_hook=f"Meta-cognition delay: confidence {transmutation_confidence:.2f}"
+                )
+
+            # Enhanced transmutation with meta-cognition insights
+            record = self.trigger_transmutation()
+
+            # Add meta-cognition metadata
+            if record.generated_hook:
+                record.generated_hook += f"\n# Meta-cognition enhanced (confidence: {transmutation_confidence:.2f})"
+            if record.generated_workflow:
+                record.generated_workflow = json.loads(record.generated_workflow)
+                record.generated_workflow["meta_cognition"] = {
+                    "transmutation_confidence": transmutation_confidence,
+                    "prediction_accuracy_trend": accuracy_trends[-1] if accuracy_trends else 0.0
+                }
+                record.generated_workflow = json.dumps(record.generated_workflow, indent=2)
+
+            return record
+
+        except Exception as e:
+            print(f"Error in meta-cognition transmutation: {e}")
+            # Fall back to regular transmutation
+            return self.trigger_transmutation()
+
+    def _calculate_transmutation_confidence(self, meta_data: Dict[str, Any]) -> float:
+        """Calculate confidence for transmutation based on meta-cognition data."""
+        total_predictions = meta_data.get('total_predictions', 0)
+        accuracy_trends = meta_data.get('accuracy_trends', [])
+        domain_performance = meta_data.get('domain_performance', {})
+
+        if total_predictions < 5:
+            return 0.5  # Low confidence with few predictions
+
+        # Average recent accuracy
+        recent_accuracy = sum(accuracy_trends[-5:]) / min(5, len(accuracy_trends)) if accuracy_trends else 0.5
+
+        # Domain diversity bonus
+        domain_count = len(domain_performance)
+        domain_bonus = min(domain_count * 0.1, 0.3)
+
+        # Fragment resonance bonus
+        resonance = self._calculate_resonance()
+        resonance_bonus = resonance * 0.2
+
+        confidence = recent_accuracy + domain_bonus + resonance_bonus
+        return min(max(confidence, 0.0), 1.0)
+
     def trigger_transmutation(self) -> TransmutationRecord:
         """Perform full transmutation cycle with soul - pause, feel, ask."""
         if not self._should_transmute():

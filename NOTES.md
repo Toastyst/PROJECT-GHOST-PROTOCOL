@@ -18,6 +18,98 @@ Threshold: trigger_condition
 ## Captured Fragments
 
 <!-- AUTOPOIESIS fragments will be automatically appended here -->
+## [2026-03-25T18:22:18.917126] PREDICTION: 0.7200000000000001
+
+Prophet prediction: incident risk 0.80 (confidence: 0.90)
+Reasoning: High risk detected...
+
+Context: {
+  "source": "prophet_engine",
+  "domain": "incident",
+  "probability": 0.8,
+  "confidence": 0.9,
+  "reasoning_steps": 1
+}
+Threshold: prophet_prediction
+---
+
+## [2026-03-25T18:22:18.915087] TEST: 0.5
+
+Test fragment for Prophet integration
+
+Context: {}
+Threshold: manual_capture
+---
+
+## [2026-03-25T18:21:10.524935] TEST: 0.5
+
+test content
+
+Context: {}
+Threshold: manual_capture
+---
+
+## [2026-03-25T18:21:10.521301] PREDICTION: 0.5599999999999999
+
+Prophet prediction: incident risk 0.70 (confidence: 0.80)
+Reasoning: Test reasoning...
+
+Context: {
+  "source": "prophet_engine",
+  "domain": "incident",
+  "probability": 0.7,
+  "confidence": 0.8,
+  "reasoning_steps": 1
+}
+Threshold: prophet_prediction
+---
+
+## [2026-03-25T18:20:07.605867] TEST: 0.5
+
+test content
+
+Context: {}
+Threshold: manual_capture
+---
+
+## [2026-03-25T18:20:07.601342] PREDICTION: 0.5599999999999999
+
+Prophet prediction: incident risk 0.70 (confidence: 0.80)
+Reasoning: Test reasoning...
+
+Context: {
+  "source": "prophet_engine",
+  "domain": "incident",
+  "probability": 0.7,
+  "confidence": 0.8,
+  "reasoning_steps": 1
+}
+Threshold: prophet_prediction
+---
+
+## [2026-03-25T18:07:59.813833] TEST: 0.5
+
+test content
+
+Context: {}
+Threshold: manual_capture
+---
+
+## [2026-03-25T18:07:59.809213] PREDICTION: 0.5599999999999999
+
+Prophet prediction: incident risk 0.70 (confidence: 0.80)
+Reasoning: Test reasoning...
+
+Context: {
+  "source": "prophet_engine",
+  "domain": "incident",
+  "probability": 0.7,
+  "confidence": 0.8,
+  "reasoning_steps": 1
+}
+Threshold: prophet_prediction
+---
+
 ## [2026-03-25T08:06:37.720551] APOLOGY: 0.5
 
 ERROR: Database connection failed - unexpected network issue
@@ -189,7 +281,7 @@ Threshold: pause_threshold
 
 ## Current Status
 
-- **Fragments Captured**: 5
+- **Fragments Captured**: 2
 - **Transmutations Performed**: 0
 - **Structures Generated**: 0
 - **Review Status**: None pending

@@ -17,40 +17,38 @@ from utils import GitUtils, CodeAnalyzer
 class TestKnowledgeBase:
     """Test KnowledgeBase class functionality."""
 
-    def test_add_knowledge(self):
+    def test_add_knowledge(self, temp_chroma_db):
         """Test adding knowledge entries."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            kb = KnowledgeBase(db_path=temp_dir)
+        kb = KnowledgeBase(db_path=temp_chroma_db)
 
-            knowledge = NexusData(
-                id="test_1",
-                content="Test commit message",
-                type="commit_message",
-                metadata={"author": "test_author", "date": "2023-01-01"},
-                relationships=[]
-            )
+        knowledge = NexusData(
+            id="test_1",
+            content="Test commit message",
+            type="commit_message",
+            metadata={"author": "test_author", "date": "2023-01-01"},
+            relationships=[]
+        )
 
-            result = kb.add_knowledge(knowledge)
-            assert result is True
+        result = kb.add_knowledge(knowledge)
+        assert result is True
 
-    def test_query_knowledge(self):
+    def test_query_knowledge(self, temp_chroma_db):
         """Test querying knowledge base."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            kb = KnowledgeBase(db_path=temp_dir)
+        kb = KnowledgeBase(db_path=temp_chroma_db)
 
-            # Add test data
-            knowledge = NexusData(
-                id="test_1",
-                content="Test commit message",
-                type="commit_message",
-                metadata={"author": "test_author"},
-                relationships=[]
-            )
-            kb.add_knowledge(knowledge)
+        # Add test data
+        knowledge = NexusData(
+            id="test_1",
+            content="Test commit message",
+            type="commit_message",
+            metadata={"author": "test_author"},
+            relationships=[]
+        )
+        kb.add_knowledge(knowledge)
 
-            # Query
-            results = kb.query_knowledge("commit")
-            assert len(results) >= 0  # May be empty due to embedding limitations
+        # Query
+        results = kb.query_knowledge("commit")
+        assert len(results) >= 0  # May be empty due to embedding limitations
 
 
 class TestNexusServer:

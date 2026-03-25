@@ -26,6 +26,33 @@
       "env": {
         "PYTHONPATH": "E:\\PROJECTS\\YoloClanker"
       }
+    },
+    "feed-ghost-server": {
+      "command": "python",
+      "args": [
+        "feed_ghost.py"
+      ],
+      "env": {
+        "PYTHONPATH": "E:\\PROJECTS\\YoloClanker"
+      }
+    },
+    "hooks-server": {
+      "command": "python",
+      "args": [
+        "hooks_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "E:\\PROJECTS\\YoloClanker"
+      }
+    },
+    "workflows-server": {
+      "command": "python",
+      "args": [
+        "workflows_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "E:\\PROJECTS\\YoloClanker"
+      }
     }
   }
 }

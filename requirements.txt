@@ -8,3 +8,4 @@ python-dotenv>=1.0.0
 transformers>=4.0.0
 textblob>=0.17.0
 spacy>=3.0.0
+rich>=13.0.0

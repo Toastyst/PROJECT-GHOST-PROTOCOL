@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "nexus-server": {
+      "command": "python",
+      "args": [
+        "nexus_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "E:\\PROJECTS\\YoloClanker"
+      }
+    },
+    "weaver-server": {
+      "command": "python",
+      "args": [
+        "weaver_server.py"
+      ],
+      "env": {
+        "PYTHONPATH": "E:\\PROJECTS\\YoloClanker"
+      }
+    },
+    "yolo-protocol": {
+      "command": "python",
+      "args": [
+        "yolo_protocol.py"
+      ],
+      "env": {
+        "PYTHONPATH": "E:\\PROJECTS\\YoloClanker"
+      }
+    }
+  }
+}

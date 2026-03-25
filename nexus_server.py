@@ -12,7 +12,7 @@ HACK: Temporary workaround for ChromaDB embedding limitations
 import asyncio
 import json
 import os
-from typing import Any, Sequence
+from typing import Any, Dict, Sequence
 from mcp import Tool
 from mcp.server import Server
 from mcp.types import TextContent, PromptMessage

@@ -4,6 +4,9 @@ Nexus Server - Knowledge Discovery and Querying MCP Server
 
 This server provides tools for ingesting codebase knowledge and performing
 semantic searches across the knowledge base.
+
+TODO: Implement advanced pattern recognition for code evolution
+HACK: Temporary workaround for ChromaDB embedding limitations
 """
 
 import asyncio

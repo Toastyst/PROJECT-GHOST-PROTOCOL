@@ -1,0 +1,182 @@
+#!/usr/bin/env python3
+"""
+Ghost Pre-Push Hook - Intention at the Boundary
+
+This hook doesn't validate. It witnesses.
+It doesn't prevent pushes. It asks what they're sharing with the world.
+"""
+
+import os
+import sys
+import json
+import subprocess
+from pathlib import Path
+from typing import Dict, List, Optional
+
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+try:
+    from models import IterationEvent
+    from datetime import datetime
+except ImportError:
+    # Fallback if models not available
+    IterationEvent = None
+
+
+class GhostPrePushHook:
+    """Pre-push hook that witnesses rather than validates."""
+
+    def __init__(self):
+        self.project_root = Path(__file__).parent.parent
+        self.ghost_dir = self.project_root / ".ghost"
+        self.config_file = self.ghost_dir / "config.json"
+        self.events_file = self.project_root / "iteration-events.json"
+
+    def load_config(self) -> Dict:
+        """Load hook configuration."""
+        if self.config_file.exists():
+            try:
+                with open(self.config_file, 'r') as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        return {"hook_config": {"reflection_mode": "question", "enabled": True}}
+
+    def get_push_info(self) -> Dict[str, any]:
+        """Get information about what will be pushed."""
+        try:
+            # Get commits that will be pushed
+            result = subprocess.run(
+                ["git", "log", "--oneline", "@{upstream}..HEAD"],
+                capture_output=True, text=True, cwd=self.project_root
+            )
+            commits = result.stdout.strip().split('\n') if result.returncode == 0 else []
+
+            # Get remote info
+            result = subprocess.run(
+                ["git", "remote", "-v"],
+                capture_output=True, text=True, cwd=self.project_root
+            )
+            remotes = result.stdout.strip() if result.returncode == 0 else ""
+
+            return {
+                "commit_count": len([c for c in commits if c.strip()]),
+                "commits": [c.strip() for c in commits if c.strip()][:5],  # First 5
+                "remote_info": remotes,
+                "has_commits": len([c for c in commits if c.strip()]) > 0
+            }
+        except Exception:
+            return {"commit_count": 0, "commits": [], "remote_info": "", "has_commits": False}
+
+    def generate_witness(self, push_info: Dict[str, any]) -> str:
+        """Generate witnessing reflection for the push."""
+        config = self.load_config()
+        mode = config.get("hook_config", {}).get("reflection_mode", "question")
+
+        if not push_info["has_commits"]:
+            return "🤔 Nothing to push. What are you holding back?"
+
+        commit_count = push_info["commit_count"]
+
+        if mode == "mirror":
+            witness = f"👁️  {commit_count} commit{'s' if commit_count != 1 else ''} will cross to the remote."
+            witness += " Code will live beyond this repository."
+            witness += " What life will it live there?"
+
+        elif mode == "pause":
+            witness = "⏸️  This code will leave your hands.\n"
+            witness += "It will run on servers you can't see.\n"
+            witness += "It will be used by people you don't know.\n"
+            witness += "What responsibility comes with this sharing?"
+
+        else:  # mode == "question" (default)
+            questions = []
+
+            if commit_count == 1:
+                questions.append("One commit carries your intention. What truth does it tell?")
+            elif commit_count < 5:
+                questions.append("A few commits tell a focused story. What chapter is this?")
+            else:
+                questions.append("Many commits speak of sustained effort. What persistence drove this work?")
+
+            questions.append("This code will serve others. What care did you put into it?")
+
+            if "origin" in push_info.get("remote_info", "").lower():
+                questions.append("Pushing to origin—the heart of the project. What trust are you placing there?")
+
+            witness = "🤔 " + " ".join(questions)
+
+        return witness
+
+    def log_event(self, event_type: str, context: Dict):
+        """Log iteration event."""
+        if not IterationEvent:
+            return
+
+        try:
+            event = IterationEvent(
+                event_type=event_type,
+                context=context,
+                participants=["developer"],
+                timestamp=datetime.now().isoformat(),
+                outcome="witnessed"
+            )
+
+            # Load existing events
+            events = []
+            if self.events_file.exists():
+                try:
+                    with open(self.events_file, 'r') as f:
+                        events = json.load(f)
+                except Exception:
+                    events = []
+
+            # Add new event
+            events.append(event.dict() if hasattr(event, 'dict') else event.__dict__)
+
+            # Save events (keep last 100)
+            with open(self.events_file, 'w') as f:
+                json.dump(events[-100:], f, indent=2)
+
+        except Exception:
+            # Don't fail the hook if logging fails
+            pass
+
+    def run(self) -> int:
+        """Run the pre-push hook."""
+        config = self.load_config()
+        if not config.get("hook_config", {}).get("enabled", True):
+            return 0  # Hook disabled, allow push
+
+        push_info = self.get_push_info()
+
+        if not push_info["has_commits"]:
+            print("🤔 Nothing to push. What are you holding back?")
+            return 0
+
+        # Generate witness
+        witness = self.generate_witness(push_info)
+        print(witness)
+
+        # Log the event
+        self.log_event("hook_trigger", {
+            "hook_type": "pre-push",
+            "push_info": push_info,
+            "witness": witness
+        })
+
+        # Always allow the push - this hook witnesses, doesn't enforce
+        print("\n👁️  The push may proceed. The world will see your work.")
+        return 0
+
+
+def main():
+    """Main hook entry point."""
+    hook = GhostPrePushHook()
+    sys.exit(hook.run())
+
+
+if __name__ == "__main__":
+    main()

@@ -1,103 +1,107 @@
 # Implementation Plan
 
-Implement PROJECT: GHOST PROTOCOL as a cohesive AI system for codebase understanding and code generation.
+## [Overview]
+Implement AUTOPOIESIS: the transmutation mechanism where YoloCline observes work, captures lessons in NOTES.md, and transmutes them into new hooks, workflows, skills, rules.
 
-PROJECT: GHOST PROTOCOL aims to create an intelligent development companion that maintains architectural cohesion through deep codebase understanding and guided code generation. The system will be implemented as three interconnected MCP servers in Python, integrated with Cline's tool ecosystem. This implementation serves as an experimental prototype in YoloClanker, testing advanced AI-driven development capabilities while remaining isolated from production projects. The Nexus will provide historical and contextual knowledge, the Weaver will generate cohesive code changes, and the YOLO Protocol will enable autonomous execution with human oversight. This approach leverages Cline's MCP framework for seamless integration, allowing developers to query codebase wisdom, receive contextually appropriate code suggestions, and delegate complex development tasks to an AI that understands the project's soul.
+AUTOPOIESIS transforms the Ghost from a static system into a self-growing entity. It observes development sessions, captures raw fragments of experience (pauses, dilemmas, discoveries), and periodically transmutes them into the infrastructure that guides future work. This creates a nervous system where every engineer's experience becomes part of the Ghost's structure.
 
-[Types]
-Define data structures for knowledge representation, code generation parameters, and autonomous execution missions.
+The approach extends the existing Iteration Protocol by adding observation, capture, and transmutation capabilities. It fits the current architecture by leveraging existing Nexus for memory, Weaver for generation, Skills/Rules for evaluation, and the repository as the living body.
 
-NexusData: A data class representing knowledge entries with fields - id: str (unique identifier), content: str (text content), type: str (e.g., 'commit_message', 'pr_comment', 'architectural_decision'), metadata: dict (additional context like author, timestamp, file_path), relationships: list[str] (ids of related entries).
+## [Types]
+Define data structures for observation, fragments, and transmutation records.
 
-WeaverRequest: A data class for code generation requests with fields - objective: str (high-level goal), context: dict (current codebase state), constraints: list[str] (architectural rules), scope: str (affected modules), patterns: list[str] (code patterns to follow).
+**NoteFragment**: Data class for raw experience fragments - fields: timestamp: str, type: str ('pause'|'dilemma'|'discovery'|'apology'), content: str, context: dict, emotional_weight: float, threshold: str.
 
-YOLOMission: A data class for autonomous execution with fields - goal: str (emotional/resonant objective), autonomy_level: int (1-5 scale of independence), checkpoints: list[str] (decision points requiring oversight), constraints: list[str] (hard boundaries), success_criteria: list[str] (completion measures).
+**TransmutationRecord**: Data class for transmutation outcomes - fields: timestamp: str, fragments_processed: int, generated_hook: Optional[str], generated_workflow: Optional[str], generated_skill: Optional[str], rule_update: Optional[str], review_status: str ('pending'|'approved'|'rejected').
 
-CodeDelta: A data class for unified code changes with fields - files: dict[str, str] (file_path -> new_content), rationale: str (explanation), risks: list[str] (potential issues), tests: list[str] (required test cases).
+**ObservationConfig**: Data class for observation triggers - fields: pause_threshold: int (seconds), dilemma_patterns: list[str], discovery_indicators: list[str], enabled: bool.
 
-[Files]
-Create new Python files for MCP servers, data models, and supporting utilities.
+**TransmutationTrigger**: Data class for transmutation conditions - fields: fragment_threshold: int, mission_complete: bool, manual_trigger: bool.
 
-New files to be created:
-- models.py: Data model definitions (NexusData, WeaverRequest, YOLOMission, CodeDelta) with validation and serialization methods
-- nexus_server.py: MCP server implementation for knowledge discovery and querying, including ingestion functions and search capabilities
-- weaver_server.py: MCP server for cohesive code generation, with integration to Nexus for context awareness
-- yolo_protocol.py: Autonomous execution engine with mission planning, branching, and oversight mechanisms
-- utils.py: Helper functions for git operations, code analysis, and LLM interactions
-- config.py: Configuration management for API keys, database paths, and system parameters
-- requirements.txt: Python dependencies list
-- test_nexus.py: Unit and integration tests for Nexus functionality
-- test_weaver.py: Tests for code generation and cohesion
-- test_yolo.py: Tests for autonomous execution scenarios
+## [Files]
+Create observation, capture, and transmutation infrastructure.
 
-Existing files to be modified: None at this stage - this is a new implementation.
+**New files:**
+- autopoiesis.py: Core engine for observation, capture, and transmutation
+- NOTES.md: Raw experience fragment repository (initial empty)
+- RULES.md: Living rules repository (initial copy from rules_engine.py)
+- transmutation_templates/: Directory with transmutation templates for hooks/workflows/skills
+- tests/test_autopoiesis.py: Tests for observation and transmutation
+- docs/AUTOPOIESIS.md: Documentation for self-growth mechanism
 
-Configuration file updates: None required - new project structure.
+**Existing files to modify:**
+- cline_integration.py: Add /transmute slash command and observation hooks
+- nexus_server.py: Add note_fragment_ingestion(), transmutation_memory_storage()
+- weaver_server.py: Add transmutation_generation() for hook/workflow/skill creation
+- skills_engine.py: Add observation_skill() for fragment capture
+- rules_engine.py: Add transmutation_rule_validation()
+- config.py: Add observation_config, transmutation_config fields
 
-[Functions]
-Implement functions for knowledge management, code generation, and autonomous development.
+**Configuration updates:** Update .clinerules for autopoiesis, add autopoiesis.json for trigger configuration.
 
-New functions:
-- ingest_codebase(repo_path: str, db_path: str) -> bool: In nexus_server.py, recursively scans repository for commits, comments, and architectural patterns, storing in vector database with metadata
-- query_nexus(query: str, filters: dict) -> list[NexusData]: In nexus_server.py, performs semantic search across knowledge base with filtering by type, date, or module
-- analyze_cohesion(request: WeaverRequest) -> dict: In weaver_server.py, evaluates current codebase state against Nexus knowledge to identify cohesion opportunities
-- generate_cohesive_code(request: WeaverRequest) -> CodeDelta: In weaver_server.py, produces unified code changes that maintain architectural principles
-- plan_mission(mission: YOLOMission) -> list[dict]: In yolo_protocol.py, breaks down high-level objective into executable steps with decision branches
-- execute_step(step: dict, context: dict) -> dict: In yolo_protocol.py, performs individual development actions with error handling and rollback
-- request_oversight(dilemma: str, options: list[str]) -> str: In yolo_protocol.py, pauses execution for human decision on conflicts or risks
+## [Functions]
+New functions for observation, capture, and transmutation.
 
-Modified functions: None - all new implementation.
+**New functions:**
+- observe_session(session_context: dict) -> list[NoteFragment]: In autopoiesis.py, captures fragments from session
+- capture_fragment(fragment_type: str, content: str, context: dict) -> NoteFragment: In autopoiesis.py, standardizes fragment capture
+- trigger_transmutation() -> TransmutationRecord: In autopoiesis.py, performs full transmutation cycle
+- generate_hook_from_fragments(fragments: list[NoteFragment]) -> str: In autopoiesis.py, weaves hook from pauses
+- weave_workflow_from_dilemmas(dilemmas: list[NoteFragment]) -> str: In autopoiesis.py, creates workflow from dilemmas
+- sculpt_skill_from_questions(questions: list[NoteFragment]) -> str: In autopoiesis.py, generates skill from unanswered questions
+- evolve_rule_from_discoveries(discoveries: list[NoteFragment]) -> str: In autopoiesis.py, updates rule from new principles
 
-Removed functions: None.
+**Modified functions:**
+- handle_slash_command(): Add /transmute command handler
+- query_nexus(): Add fragment context for transmutation
+- generate_cohesive_code(): Support transmutation template generation
+- evaluate_skill_activation(): Add observation mode
+- evaluate_rule_compliance(): Add transmutation validation
 
-[Classes]
-Define classes for MCP servers, data models, and execution engines.
+## [Classes]
+New classes for autopoiesis core.
 
-New classes:
-- NexusServer: MCP server class inheriting from MCP base, with methods for tool registration (ingest_tool, query_tool), resource management, and notification handling
-- WeaverServer: MCP server class with tool registration for code generation, cohesion analysis, and Nexus integration
-- YOLOEngine: Core execution class with methods for mission planning, step execution, anomaly detection, and human interaction
-- KnowledgeBase: Wrapper class for vector database operations with embedding generation and similarity search
-- CodeAnalyzer: Utility class for parsing code structures, identifying patterns, and validating changes
+**New classes:**
+- AutopoiesisEngine: Core engine for self-growth through transmutation
+- FragmentObserver: Session observation and fragment capture
+- TransmutationForge: Fragment-to-structure transmutation logic
+- ReviewOrchestrator: Human review and approval workflow
 
-Modified classes: None.
+**Modified classes:**
+- ClineGhostIntegration: Add autopoiesis observation and /transmute command
+- NexusServer: Add fragment storage and transmutation memory
+- WeaverServer: Add transmutation-specific generation modes
+- SkillsEngine: Add observation skill for fragment capture
+- RulesEngine: Add transmutation rule evolution
 
-Removed classes: None.
+## [Dependencies]
+Add observation and transmutation packages.
 
-[Dependencies]
-Add Python packages for MCP framework, vector database, LLM integration, and development tools.
+**New packages:**
+- watchdog>=2.0.0: File system observation for NOTES.md monitoring
+- schedule>=1.2.0: Ritual transmutation scheduling
+- jinja2>=3.1.0: Workflow and hook template rendering
 
-New packages to add:
-- mcp: Model Context Protocol framework for server implementation
-- chromadb: Vector database for knowledge storage and semantic search
-- openai: LLM integration for code generation and analysis
-- gitpython: Git repository operations for history ingestion
-- pydantic: Data validation and serialization for type safety
-- pytest: Testing framework for unit and integration tests
-- python-dotenv: Environment variable management for API keys
+**Version updates:** None required.
 
-Version constraints: mcp>=0.1.0, chromadb>=0.4.0, openai>=1.0.0, gitpython>=3.1.0
+## [Testing]
+Test observation, capture, and transmutation cycles.
 
-Integration requirements: Configure MCP servers to register with Cline, set up vector database initialization, establish OpenAI API access.
+**Test files:**
+- test_autopoiesis.py: Fragment capture, transmutation triggers, generation validation
+- test_fragment_observer.py: Session observation accuracy
+- test_transmutation_forge.py: Hook/workflow/skill generation from fragments
+- test_review_orchestrator.py: Human review workflow
 
-[Testing]
-Create comprehensive tests for each component with unit, integration, and scenario-based validation.
+**Validation:** Mock sessions, simulate fragments, validate generated structures, test review cycles.
 
-Test file requirements:
-- test_nexus.py: Tests for knowledge ingestion (mock git repo), query accuracy, metadata handling
-- test_weaver.py: Tests for code generation quality, cohesion validation, Nexus integration
-- test_yolo.py: Tests for mission planning, step execution, oversight requests, error recovery
-
-Existing test modifications: None - new test suite.
-
-Validation strategies: Use pytest fixtures for mock repositories, LLM responses, and database states. Include integration tests that run full MCP server instances. Validate code generation against syntax checking and architectural rules.
-
-[Implementation Order]
-Implement components in logical dependency order to ensure incremental testing and integration.
-
-1. Set up project structure, dependencies, and basic MCP server scaffolding
-2. Implement Nexus server with knowledge ingestion and querying capabilities
-3. Build Weaver server with code generation and Nexus integration
-4. Develop YOLO Protocol with autonomous execution and oversight mechanisms
-5. Create comprehensive test suite and validate end-to-end functionality
-6. Integrate servers with Cline MCP configuration and test in YoloClanker environment
+## [Implementation Order]
+1. Define new types for fragments, transmutations, observation configs
+2. Create autopoiesis.py core engine and fragment capture mechanisms
+3. Implement observation in cline_integration.py with /transmute command
+4. Add fragment storage to nexus_server.py and transmutation memory
+5. Implement transmutation forge for hook/workflow/skill generation
+6. Add human review workflow and repository commit integration
+7. Update skills_engine.py and rules_engine.py for observation/transmutation support
+8. Create comprehensive tests for full autopoiesis cycle
+9. Document AUTOPOIESIS mechanism and perform initial transmutation

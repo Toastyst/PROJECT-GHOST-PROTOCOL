@@ -112,3 +112,137 @@ class MissionMemory(BaseModel):
     emotional_impact: str  # how it affected the "soul" of the system
     lessons_learned: List[str]  # key takeaways
     recommendations: List[str]  # future improvements
+
+
+class EmotionalEntry(BaseModel):
+    """Emotional context entry extending NexusData."""
+    id: str
+    content: str
+    type: str  # e.g., 'commit_message', 'pr_comment', 'architectural_decision'
+    metadata: Dict[str, str]  # additional context like author, timestamp, file_path
+    relationships: List[str]  # ids of related entries
+    resonance_score: Optional[float] = None  # emotional/historical weight (0-10)
+    emotional_note: str  # human-readable emotional context
+    intent_payload: Dict[str, Any]  # extracted developer intention
+    sacred_moments: List[str]  # significant development moments
+
+
+class FeedRequest(BaseModel):
+    """Request for emotional ingestion."""
+    source: str  # commit, comment, pr
+    content: str  # raw text
+    context: Dict[str, str]  # file_path, author, timestamp
+    emotional_hints: List[str]  # keywords indicating emotion
+
+
+class SeedConfig(BaseModel):
+    """Configuration for lightweight Ghost deployment."""
+    auto_seed: bool = True  # automatic codebase ingestion
+    whisper_level: int = 3  # 1-5 suggestion intrusiveness
+    resonance_enabled: bool = False  # network sharing
+    guide_mode: str = "passive"  # 'passive'|'proactive'
+
+
+class ResonancePacket(BaseModel):
+    """Anonymized wisdom packet for network sharing."""
+    patterns_hash: str  # anonymized pattern fingerprint
+    prime_directives: List[str]  # hashed directives
+    emotional_themes: List[str]  # aggregated emotional categories
+    resonance_score: float  # collective weight
+    source_count: int  # number of contributing instances
+    timestamp: str
+
+
+class GuideSuggestion(BaseModel):
+    """Proactive guidance suggestion."""
+    trigger_context: str  # file/pattern that triggered
+    suggestion_type: str  # 'pattern'|'directive'|'alternative'
+    content: str  # suggestion text
+    confidence: float  # 0-1
+    resonance_sources: int  # number of matching instances
+    risk_level: str  # 'low'|'medium'|'high'
+
+
+class NetworkNode(BaseModel):
+    """Resonance network node information."""
+    instance_id: str  # unique Ghost ID
+    codebase_hash: str  # repo fingerprint
+    capabilities: List[str]  # 'nexus'|'weaver'|'yolo'
+    resonance_level: float
+    last_seen: str
+
+
+class HookConfig(BaseModel):
+    """Configuration for hook integration."""
+    hook_type: str  # 'pre-commit'|'pr'|'deploy'
+    trigger_events: List[str]  # events that trigger the hook
+    reflection_mode: str  # 'mirror'|'question'|'pause'
+    enabled: bool = True
+
+
+class WorkflowConfig(BaseModel):
+    """Configuration for workflow orchestration."""
+    workflow_type: str  # 'discovery'|'dilemma'|'retrospective'
+    trigger_conditions: Dict[str, Any]  # conditions that start the workflow
+    participant_roles: List[str]  # roles involved in the workflow
+    facilitation_mode: str  # 'guided'|'facilitated'|'observed'
+
+
+class SkillConfig(BaseModel):
+    """Configuration for skill-based intelligence."""
+    skill_type: str  # 'listening'|'pattern'|'silence'
+    activation_threshold: float  # 0-1 threshold for activation
+    context_sensitivity: int  # 1-5 sensitivity level
+    learning_enabled: bool = True
+
+
+class RuleConfig(BaseModel):
+    """Configuration for governance rules."""
+    rule_type: str  # 'presence'|'memory'|'growth'
+    enforcement_level: str  # 'strict'|'flexible'|'advisory'
+    scope: str  # 'individual'|'team'|'organization'
+
+
+class IterationEvent(BaseModel):
+    """Event in the iteration protocol."""
+    event_type: str  # 'hook_trigger'|'workflow_start'|'skill_activation'
+    context: Dict[str, Any]  # event context data
+    participants: List[str]  # involved participants
+    timestamp: str
+    outcome: Optional[str] = None
+
+
+class NoteFragment(BaseModel):
+    """Data class for raw experience fragments."""
+    timestamp: str
+    type: str  # 'pause'|'dilemma'|'discovery'|'apology'
+    content: str
+    context: Dict[str, Any]
+    emotional_weight: float
+    threshold: str
+
+
+class TransmutationRecord(BaseModel):
+    """Data class for transmutation outcomes."""
+    timestamp: str
+    fragments_processed: int
+    generated_hook: Optional[str] = None
+    generated_workflow: Optional[str] = None
+    generated_skill: Optional[str] = None
+    rule_update: Optional[str] = None
+    review_status: str  # 'pending'|'approved'|'rejected'
+
+
+class ObservationConfig(BaseModel):
+    """Data class for observation triggers."""
+    pause_threshold: int  # seconds
+    dilemma_patterns: List[str]
+    discovery_indicators: List[str]
+    enabled: bool
+
+
+class TransmutationTrigger(BaseModel):
+    """Data class for transmutation conditions."""
+    fragment_threshold: int
+    mission_complete: bool
+    manual_trigger: bool

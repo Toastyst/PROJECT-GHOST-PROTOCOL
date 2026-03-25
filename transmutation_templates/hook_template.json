@@ -1,0 +1,34 @@
+{
+  "template_name": "reflection_hook",
+  "description": "Template for generating reflection hooks from pause fragments",
+  "structure_type": "hook",
+  "fragment_types": ["pause"],
+  "min_fragments": 3,
+  "template": {
+    "code_structure": "python_function",
+    "imports": ["import time", "import asyncio"],
+    "function_name": "reflection_hook_{timestamp}",
+    "parameters": [],
+    "docstring": "Auto-generated reflection hook from observed pauses.",
+    "body": [
+      "reflection_duration = {avg_pause_duration}",
+      "print(f\"🤖 Ghost reflection: Processing {fragments_processed} experience fragments...\")",
+      "await asyncio.sleep(reflection_duration)",
+      "return {",
+      "    \"triggered_by\": \"autopoiesis_pause_pattern\",",
+      "    \"fragments_processed\": {fragments_processed},",
+      "    \"reflection_duration\": reflection_duration,",
+      "    \"hook_type\": \"reflection\"",
+      "}"
+    ],
+    "variables": {
+      "avg_pause_duration": "sum(f.emotional_weight * 10 for f in fragments) / len(fragments)",
+      "fragments_processed": "len(fragments)"
+    }
+  },
+  "validation_rules": [
+    "No forced execution patterns",
+    "Includes proper error handling",
+    "Has user consent verification"
+  ]
+}

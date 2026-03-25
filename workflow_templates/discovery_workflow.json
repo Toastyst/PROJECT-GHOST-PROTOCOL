@@ -1,0 +1,107 @@
+{
+  "workflow_type": "discovery",
+  "name": "New Engineer Discovery Flow",
+  "description": "Guided journey for new team members to understand the codebase through story and memory",
+  "trigger_conditions": {
+    "new_contributor": true,
+    "first_commit": true,
+    "manual_activation": true
+  },
+  "participant_roles": [
+    "new_engineer",
+    "ghost_guide",
+    "team_mentor"
+  ],
+  "facilitation_mode": "guided",
+  "stages": [
+    {
+      "name": "Welcome to the Memory",
+      "description": "Introduction to the codebase as a living story",
+      "activities": [
+        {
+          "type": "reflection",
+          "prompt": "Every codebase has scars. What brings you to this one?",
+          "duration_minutes": 5
+        },
+        {
+          "type": "nexus_query",
+          "query": "architectural foundations and founding stories",
+          "purpose": "Understand the project's origins"
+        }
+      ],
+      "transitions": {
+        "next": "The Scars We Carry",
+        "skip_condition": "already_familiar"
+      }
+    },
+    {
+      "name": "The Scars We Carry",
+      "description": "Learning from past challenges and hard-won lessons",
+      "activities": [
+        {
+          "type": "story_sharing",
+          "stories": [
+            "the great refactoring of 2023",
+            "the authentication incident",
+            "the performance crisis"
+          ],
+          "reflection": "What do these stories teach about our values?"
+        },
+        {
+          "type": "pattern_recognition",
+          "focus": "recurring architectural decisions",
+          "question": "Why do we make these choices?"
+        }
+      ],
+      "transitions": {
+        "next": "Your Place in the Story",
+        "alternative": "Technical Deep Dive"
+      }
+    },
+    {
+      "name": "Your Place in the Story",
+      "description": "Finding where the new engineer fits into the ongoing narrative",
+      "activities": [
+        {
+          "type": "role_discovery",
+          "assessment": "strengths and interests alignment",
+          "mentorship_pairing": true
+        },
+        {
+          "type": "first_contribution_guidance",
+          "focus": "meaningful starting point",
+          "emotional_context": "What impact do you want to make?"
+        }
+      ],
+      "transitions": {
+        "complete": "Welcome to the team"
+      }
+    }
+  ],
+  "emotional_arc": {
+    "entry_emotion": "curiosity",
+    "peak_emotion": "connection",
+    "exit_emotion": "belonging"
+  },
+  "success_criteria": [
+    "New engineer feels connected to team history",
+    "Clear understanding of contribution pathways",
+    "Emotional investment in project mission",
+    "Mentorship relationship established"
+  ],
+  "failure_modes": [
+    {
+      "condition": "overwhelmed_by_history",
+      "recovery": "Focus on recent stories and current challenges"
+    },
+    {
+      "condition": "disconnect_from_values",
+      "recovery": "Explore personal alignment with project mission"
+    }
+  ],
+  "memory_capture": {
+    "lessons_learned": true,
+    "emotional_journey": true,
+    "integration_feedback": true
+  }
+}

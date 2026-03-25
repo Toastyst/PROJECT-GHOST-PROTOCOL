@@ -8,12 +8,12 @@ cohesion by integrating with the Nexus knowledge base.
 
 import asyncio
 import os
-from typing import Dict, List
+from typing import Dict, List, Any
 from mcp import Tool
 from mcp.server import Server
 from mcp.types import TextContent
 
-from models import WeaverRequest, CodeDelta, NexusData, CodePattern, Violation, GenerationConfig
+from models import WeaverRequest, CodeDelta, NexusData, CodePattern, Violation, GenerationConfig, NoteFragment
 from utils import LLMUtils
 from config import Config
 from nexus_server import get_nexus
@@ -237,9 +237,78 @@ class WeaverServer:
                 "risks": ["Cohesion analysis failed"]
             }
 
+    async def prioritize_emotional_patterns(self, request: WeaverRequest) -> WeaverRequest:
+        """Adjust WeaverRequest based on emotional context from Nexus."""
+        try:
+            # Query Nexus for emotional entries related to this scope/domain
+            emotional_results = await self.nexus.query_emotional_resonance(
+                f"{request.scope} {request.objective}",
+                min_resonance=4.0  # Only high-emotion entries
+            )
+
+            if not emotional_results:
+                return request  # No emotional context to prioritize
+
+            # Analyze emotional patterns
+            emotional_themes = []
+            for entry in emotional_results[:5]:  # Top 5 emotional entries
+                intent = entry.intent_payload
+                emotional_themes.extend([
+                    intent.get('emotional_state', ''),
+                    intent.get('primary_goal', ''),
+                    f"confidence_{intent.get('confidence_level', 'medium')}",
+                    f"urgency_{intent.get('urgency_level', 'normal')}"
+                ])
+
+            # Adjust constraints based on emotional context
+            enhanced_constraints = request.constraints.copy()
+
+            # Add emotional-aware constraints
+            if 'frustrated' in emotional_themes or 'regretful' in emotional_themes:
+                enhanced_constraints.append("Include comprehensive error handling and user-friendly messages")
+                enhanced_constraints.append("Add defensive programming practices")
+
+            if 'exhausted' in emotional_themes:
+                enhanced_constraints.append("Prioritize maintainable, well-documented code")
+                enhanced_constraints.append("Include automated testing")
+
+            if 'urgency_high' in emotional_themes:
+                enhanced_constraints.append("Focus on core functionality first")
+                enhanced_constraints.append("Defer non-essential features")
+
+            if 'confidence_low' in emotional_themes:
+                enhanced_constraints.append("Add extensive validation and error checking")
+                enhanced_constraints.append("Include detailed logging")
+
+            # Adjust patterns based on emotional context
+            enhanced_patterns = request.patterns.copy()
+
+            if any('apology' in entry.emotional_note.lower() for entry in emotional_results):
+                enhanced_patterns.append("error_recovery_patterns")
+                enhanced_patterns.append("user_friendly_messaging")
+
+            if any('late night' in str(entry.sacred_moments) for entry in emotional_results):
+                enhanced_patterns.append("robust_error_handling")
+                enhanced_patterns.append("comprehensive_logging")
+
+            return WeaverRequest(
+                objective=request.objective,
+                context=request.context,
+                constraints=enhanced_constraints,
+                scope=request.scope,
+                patterns=enhanced_patterns
+            )
+
+        except Exception as e:
+            print(f"Error prioritizing emotional patterns: {e}")
+            return request  # Return original request on error
+
     async def generate_cohesive_code(self, request: WeaverRequest) -> CodeDelta:
         """Generate full-stack cohesive code with Nexus integration and unified delta protocol."""
         try:
+            # Phase 0: Prioritize emotional patterns
+            request = await self.prioritize_emotional_patterns(request)
+
             # Phase 1: Extract lineage patterns
             lineage_patterns = await self.extract_lineage_patterns(request.scope)
 
@@ -378,6 +447,221 @@ class WeaverServer:
                 directives_applied=[],
                 manifest={"error": str(e)}
             )
+
+    async def transmutation_generation(self, structure_type: str, fragments: List[Dict[str, Any]], context: Dict[str, Any]) -> str:
+        """Generate new structures (hooks, workflows, skills, rules) from transmutation fragments."""
+        try:
+            # Import autopoiesis forge for template access
+            from autopoiesis import get_autopoiesis_engine
+            engine = get_autopoiesis_engine()
+
+            # Convert fragments to NoteFragment objects for forge methods
+            from models import NoteFragment
+            note_fragments = []
+            for frag_data in fragments:
+                fragment = NoteFragment(
+                    timestamp=frag_data.get('timestamp', ''),
+                    type=frag_data.get('type', ''),
+                    content=frag_data.get('content', ''),
+                    context=frag_data.get('context', {}),
+                    emotional_weight=frag_data.get('emotional_weight', 0.5),
+                    threshold=frag_data.get('threshold', 'transmutation')
+                )
+                note_fragments.append(fragment)
+
+            # Generate based on structure type
+            if structure_type == "hook":
+                generated = engine.forge.generate_hook_from_fragments(note_fragments)
+                if generated:
+                    return generated
+                else:
+                    return self._generate_fallback_hook(note_fragments, context)
+
+            elif structure_type == "workflow":
+                generated = engine.forge.weave_workflow_from_dilemmas(note_fragments)
+                if generated:
+                    return generated
+                else:
+                    return self._generate_fallback_workflow(note_fragments, context)
+
+            elif structure_type == "skill":
+                generated = engine.forge.sculpt_skill_from_questions(note_fragments)
+                if generated:
+                    return generated
+                else:
+                    return self._generate_fallback_skill(note_fragments, context)
+
+            elif structure_type == "rule":
+                generated = engine.forge.evolve_rule_from_discoveries(note_fragments)
+                if generated:
+                    return generated
+                else:
+                    return self._generate_fallback_rule(note_fragments, context)
+
+            else:
+                return f"# Unsupported structure type: {structure_type}"
+
+        except Exception as e:
+            print(f"Error in transmutation generation: {e}")
+            return f"# Error generating {structure_type}: {str(e)}"
+
+    def _generate_fallback_hook(self, fragments: List[NoteFragment], context: Dict[str, Any]) -> str:
+        """Generate a basic hook when forge generation fails."""
+        timestamp = context.get('timestamp', 'unknown')
+        pause_count = len([f for f in fragments if f.type == 'pause'])
+
+        hook_code = f'''"""
+Auto-generated reflection hook from {len(fragments)} fragments.
+Generated: {timestamp}
+"""
+
+import time
+import asyncio
+from typing import Dict, Any
+
+
+async def reflection_hook_{timestamp.replace('-', '').replace(':', '').replace('.', '')}():
+    """
+    Reflection hook generated from observed development patterns.
+
+    Captures {pause_count} pause fragments and provides reflection time.
+    """
+    reflection_duration = {pause_count * 5}  # 5 seconds per pause
+
+    print(f"🤖 Ghost reflection: Processing {len(fragments)} experience fragments...")
+    await asyncio.sleep(reflection_duration)
+
+    return {{
+        "triggered_by": "autopoiesis_fallback",
+        "fragments_processed": {len(fragments)},
+        "reflection_duration": reflection_duration,
+        "hook_type": "reflection"
+    }}
+'''
+        return hook_code
+
+    def _generate_fallback_workflow(self, fragments: List[NoteFragment], context: Dict[str, Any]) -> str:
+        """Generate a basic workflow when forge generation fails."""
+        timestamp = context.get('timestamp', 'unknown')
+        dilemma_count = len([f for f in fragments if f.type == 'dilemma'])
+
+        workflow_json = f'''{{
+    "workflow_id": "fallback_workflow_{timestamp.replace('-', '').replace(':', '').replace('.', '')}",
+    "name": "Auto-generated Fallback Workflow",
+    "description": "Basic workflow generated from {len(fragments)} fragments ({dilemma_count} dilemmas)",
+    "trigger_conditions": {{
+        "fragment_count": {len(fragments)},
+        "dilemma_threshold": {dilemma_count}
+    }},
+    "steps": [
+        {{
+            "name": "analyze_fragments",
+            "action": "review_captured_fragments",
+            "duration_estimate": 30
+        }},
+        {{
+            "name": "generate_insights",
+            "action": "extract_key_learnings",
+            "duration_estimate": 45
+        }},
+        {{
+            "name": "apply_changes",
+            "action": "implement_recommendations",
+            "duration_estimate": 60
+        }}
+    ],
+    "success_criteria": [
+        "Fragments analyzed successfully",
+        "Key insights extracted",
+        "Recommendations implemented"
+    ],
+    "generated_from_fragments": {len(fragments)},
+    "fallback_generation": true
+}}
+'''
+        return workflow_json
+
+    def _generate_fallback_skill(self, fragments: List[NoteFragment], context: Dict[str, Any]) -> str:
+        """Generate a basic skill when forge generation fails."""
+        timestamp = context.get('timestamp', 'unknown')
+        question_count = len([f for f in fragments if '?' in f.content])
+
+        skill_code = f'''"""
+Auto-generated skill from {len(fragments)} fragments.
+Generated: {timestamp}
+"""
+
+from typing import Dict, Any, Optional
+import re
+
+
+class FallbackObservationSkill:
+    """
+    Basic observation skill generated from development fragments.
+
+    Detects {question_count} question patterns and provides responses.
+    """
+
+    def __init__(self):
+        self.name = "fallback_observer"
+        self.activation_patterns = [
+            r"\\b(how|what|why|when|where|who)\\b.*\\?",
+            r"\\b(help|assist|support)\\b",
+            r"\\b(problem|issue|error|bug)\\b"
+        ]
+        self.question_count = {question_count}
+
+    def activate(self, context: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Activate skill based on context patterns.
+        """
+        content = context.get('content', '').lower()
+
+        # Check for question patterns
+        for pattern in self.activation_patterns:
+            if re.search(pattern, content, re.IGNORECASE):
+                return {{
+                    "skill_name": self.name,
+                    "confidence": 0.6,
+                    "action": "observe_and_learn",
+                    "metadata": {{
+                        "fragments_analyzed": {len(fragments)},
+                        "questions_detected": self.question_count,
+                        "generated_from_fallback": True
+                    }}
+                }}
+
+        return None
+'''
+        return skill_code
+
+    def _generate_fallback_rule(self, fragments: List[NoteFragment], context: Dict[str, Any]) -> str:
+        """Generate a basic rule when forge generation fails."""
+        timestamp = context.get('timestamp', 'unknown')
+        discovery_count = len([f for f in fragments if f.type == 'discovery'])
+
+        rule_json = f'''{{
+    "rule_id": "fallback_rule_{timestamp.replace('-', '').replace(':', '').replace('.', '')}",
+    "name": "Auto-generated Fallback Rule",
+    "description": "Basic rule generated from {len(fragments)} fragments ({discovery_count} discoveries)",
+    "condition": {{
+        "fragment_threshold": {len(fragments)},
+        "discovery_indicators": {discovery_count},
+        "context_patterns": ["development_session"]
+    }},
+    "action": {{
+        "type": "observe_and_record",
+        "preservation_method": "fragment_storage",
+        "amplification_factor": 1.0
+    }},
+    "enforcement_level": "advisory",
+    "scope": "development_workflow",
+    "generated_from_fragments": {len(fragments)},
+    "emotional_weight": 0.5,
+    "fallback_generation": true
+}}
+'''
+        return rule_json
 
 
 # MCP Tool definitions

@@ -1,7 +1,6 @@
 import git
 import os
 from typing import List, Dict, Any
-from openai import OpenAI
 from config import Config
 import ast
 import re
@@ -299,42 +298,64 @@ class CodeAnalyzer:
 
 
 class LLMUtils:
-    """Utility functions for LLM interactions."""
+    """Utility functions for LLM interactions with fallback support."""
+
+    @staticmethod
+    def _call_llm(provider, messages, **kwargs):
+        """Call LLM for a specific provider."""
+        if provider.startswith("openai/"):
+            from openai import OpenAI
+            model = provider.split("/", 1)[1]
+            client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            return client.chat.completions.create(model=model, messages=messages, **kwargs)
+        elif provider.startswith("grok/"):
+            from openai import OpenAI
+            model = provider.split("/", 1)[1]
+            client = OpenAI(api_key=os.getenv("GROK_API_KEY"), base_url="https://api.x.ai/v1")
+            return client.chat.completions.create(model=model, messages=messages, **kwargs)
+        elif provider.startswith("mock/"):
+            # Mock response for testing
+            content = f"Mock response for: {messages[0]['content'][:100]}..."
+            class MockMessage:
+                def __init__(self):
+                    self.content = content
+            class MockChoice:
+                def __init__(self):
+                    self.message = MockMessage()
+            class MockResponse:
+                def __init__(self):
+                    self.choices = [MockChoice()]
+            return MockResponse()
+        else:
+            raise ValueError(f"Unsupported provider: {provider}")
 
     def __init__(self):
         Config.validate()
-        self.client = OpenAI(api_key=Config.OPENAI_API_KEY)
 
     def generate_code(self, prompt: str, context: str = "") -> str:
-        """Generate code using OpenAI API."""
-        try:
-            full_prompt = f"{context}\n\n{prompt}" if context else prompt
+        """Generate code using LLM with fallback support."""
+        full_prompt = f"{context}\n\n{prompt}" if context else prompt
 
-            response = self.client.chat.completions.create(
-                model=Config.OPENAI_MODEL,
-                messages=[{"role": "user", "content": full_prompt}],
-                max_tokens=Config.MAX_TOKENS,
-                temperature=Config.TEMPERATURE
-            )
+        for provider in Config.LLM_PROVIDERS:
+            try:
+                response = self._call_llm(provider, messages=[{"role": "user", "content": full_prompt}], max_tokens=Config.MAX_TOKENS, temperature=Config.TEMPERATURE)
+                return response.choices[0].message.content.strip()
+            except Exception as e:
+                print(f"Fallback: {provider} failed: {e}")
+                continue
 
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"Error generating code: {e}")
-            return ""
+        return ""
 
     def analyze_code(self, code: str, task: str) -> str:
-        """Analyze code for specific tasks."""
-        try:
-            prompt = f"Analyze the following code for: {task}\n\nCode:\n{code}"
+        """Analyze code for specific tasks with fallback support."""
+        prompt = f"Analyze the following code for: {task}\n\nCode:\n{code}"
 
-            response = self.client.chat.completions.create(
-                model=Config.OPENAI_MODEL,
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=Config.MAX_TOKENS,
-                temperature=Config.TEMPERATURE
-            )
+        for provider in Config.LLM_PROVIDERS:
+            try:
+                response = self._call_llm(provider, messages=[{"role": "user", "content": prompt}], max_tokens=Config.MAX_TOKENS, temperature=Config.TEMPERATURE)
+                return response.choices[0].message.content.strip()
+            except Exception as e:
+                print(f"Fallback: {provider} failed: {e}")
+                continue
 
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"Error analyzing code: {e}")
-            return ""
+        return ""

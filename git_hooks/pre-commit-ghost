@@ -1,0 +1,205 @@
+#!/usr/bin/env python3
+"""
+Ghost Pre-Commit Hook - Reflection at the Threshold
+
+This hook doesn't enforce rules. It reflects intention.
+It doesn't prevent commits. It asks what they mean.
+"""
+
+import os
+import sys
+import json
+import subprocess
+from pathlib import Path
+from typing import Dict, List, Optional
+import hashlib
+
+# Add project root to path for imports
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+try:
+    from models import IterationEvent
+    from datetime import datetime
+except ImportError:
+    # Fallback if models not available
+    IterationEvent = None
+
+
+class GhostPreCommitHook:
+    """Pre-commit hook that reflects rather than enforces."""
+
+    def __init__(self):
+        self.project_root = Path(__file__).parent.parent
+        self.ghost_dir = self.project_root / ".ghost"
+        self.config_file = self.ghost_dir / "config.json"
+        self.events_file = self.project_root / "iteration-events.json"
+
+    def load_config(self) -> Dict:
+        """Load hook configuration."""
+        if self.config_file.exists():
+            try:
+                with open(self.config_file, 'r') as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        return {"hook_config": {"reflection_mode": "question", "enabled": True}}
+
+    def get_staged_changes(self) -> Dict[str, str]:
+        """Get summary of staged changes."""
+        try:
+            # Get staged files
+            result = subprocess.run(
+                ["git", "diff", "--cached", "--name-only"],
+                capture_output=True, text=True, cwd=self.project_root
+            )
+            files = result.stdout.strip().split('\n') if result.returncode == 0 else []
+
+            # Get diff stats
+            result = subprocess.run(
+                ["git", "diff", "--cached", "--stat"],
+                capture_output=True, text=True, cwd=self.project_root
+            )
+            stats = result.stdout.strip() if result.returncode == 0 else ""
+
+            return {
+                "files": [f for f in files if f],
+                "stats": stats,
+                "file_count": len([f for f in files if f])
+            }
+        except Exception:
+            return {"files": [], "stats": "", "file_count": 0}
+
+    def generate_reflection(self, changes: Dict[str, str]) -> str:
+        """Generate reflective question based on changes."""
+        config = self.load_config()
+        mode = config.get("hook_config", {}).get("reflection_mode", "question")
+
+        if not changes["files"]:
+            return "🤔 No changes staged. What are you preparing to share?"
+
+        file_count = changes["file_count"]
+        files = changes["files"]
+
+        # Analyze change patterns
+        has_code = any(f.endswith(('.py', '.js', '.ts', '.java', '.cpp', '.go')) for f in files)
+        has_tests = any('test' in f.lower() for f in files)
+        has_config = any(f.endswith(('.json', '.yaml', '.yml', '.toml', '.ini')) for f in files)
+        has_docs = any(f.endswith(('.md', '.txt', '.rst')) for f in files)
+
+        if mode == "mirror":
+            # Mirror back what they changed
+            reflection = f"👁️  I see you're changing {file_count} file{'s' if file_count != 1 else ''}."
+            if has_code:
+                reflection += " Code is being shaped."
+            if has_tests:
+                reflection += " Tests are being written."
+            if has_config:
+                reflection += " Configuration is being adjusted."
+            if has_docs:
+                reflection += " Stories are being told."
+            reflection += " What story does this change tell?"
+
+        elif mode == "pause":
+            # Force a pause for reflection
+            reflection = "⏸️  Before this commit crosses the threshold...\n"
+            reflection += "Take a breath. Feel the weight of this change.\n"
+            reflection += "What emotion drove this code? What question were you answering?\n"
+            reflection += "The repository will remember this moment. What do you want it to remember?"
+
+        else:  # mode == "question" (default)
+            # Ask reflective questions
+            questions = []
+
+            if has_code and not has_tests:
+                questions.append("This code will live in production. What user pain is it easing?")
+            elif has_tests and not has_code:
+                questions.append("These tests protect against future pain. What past pain are they remembering?")
+            elif has_code and has_tests:
+                questions.append("Code and tests together tell a complete story. What chapter is this?")
+
+            if file_count > 10:
+                questions.append("Many files are changing. Is this evolution or revolution?")
+            elif file_count == 1:
+                questions.append("A single file transforms. What butterfly emerges from this chrysalis?")
+
+            if has_config:
+                questions.append("Configuration changes ripple outward. Who will feel this change?")
+
+            if not questions:
+                questions.append("Every commit is a choice. What choice is this commit making?")
+
+            reflection = "🤔 " + " ".join(questions)
+
+        return reflection
+
+    def log_event(self, event_type: str, context: Dict):
+        """Log iteration event."""
+        if not IterationEvent:
+            return
+
+        try:
+            event = IterationEvent(
+                event_type=event_type,
+                context=context,
+                participants=["developer"],
+                timestamp=datetime.now().isoformat(),
+                outcome="reflected"
+            )
+
+            # Load existing events
+            events = []
+            if self.events_file.exists():
+                try:
+                    with open(self.events_file, 'r') as f:
+                        events = json.load(f)
+                except Exception:
+                    events = []
+
+            # Add new event
+            events.append(event.dict() if hasattr(event, 'dict') else event.__dict__)
+
+            # Save events (keep last 100)
+            with open(self.events_file, 'w') as f:
+                json.dump(events[-100:], f, indent=2)
+
+        except Exception:
+            # Don't fail the hook if logging fails
+            pass
+
+    def run(self) -> int:
+        """Run the pre-commit hook."""
+        config = self.load_config()
+        if not config.get("hook_config", {}).get("enabled", True):
+            return 0  # Hook disabled, allow commit
+
+        changes = self.get_staged_changes()
+
+        if not changes["files"]:
+            print("🤔 No changes staged. What are you preparing to share?")
+            return 0
+
+        # Generate reflection
+        reflection = self.generate_reflection(changes)
+        print(reflection)
+
+        # Log the event
+        self.log_event("hook_trigger", {
+            "hook_type": "pre-commit",
+            "changes": changes,
+            "reflection": reflection
+        })
+
+        # Always allow the commit - this hook reflects, doesn't enforce
+        print("\n💭 The commit may proceed. The repository remembers.")
+        return 0
+
+
+def main():
+    """Main hook entry point."""
+    hook = GhostPreCommitHook()
+    sys.exit(hook.run())
+
+
+if __name__ == "__main__":
+    main()

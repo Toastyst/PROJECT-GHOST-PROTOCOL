@@ -461,6 +461,50 @@ class YOLOEngine:
         except Exception as e:
             print(f"Error ingesting mission memory: {e}")
 
+    async def log_sacred_moment(self, moment_type: str, description: str, context: Dict[str, Any], resonance_score: float = 8.0) -> bool:
+        """Log a sacred moment - significant emotional development event."""
+        try:
+            # Create sacred moment entry
+            sacred_entry = {
+                "id": f"sacred_{moment_type}_{datetime.now().isoformat()}",
+                "content": f"SACRED MOMENT - {moment_type.upper()}: {description}",
+                "type": "sacred_moment",
+                "metadata": {
+                    "moment_type": moment_type,
+                    "description": description,
+                    "context": json.dumps(context),
+                    "timestamp": datetime.now().isoformat(),
+                    "narrative_position": len(self.narrative_stream),
+                    "emotional_weight": resonance_score
+                },
+                "relationships": [],
+                "resonance_score": resonance_score
+            }
+
+            # Add to narrative stream
+            self._add_narrative_entry(
+                action=f"Sacred Moment: {moment_type}",
+                context=description,
+                risk_level="low",
+                emotional_note=f"Resonance: {resonance_score}/10"
+            )
+
+            # Store in Nexus for long-term memory
+            from models import NexusData
+            nexus_data = NexusData(**sacred_entry)
+            success = await self.nexus.knowledge_base.add_knowledge(nexus_data)
+
+            if success:
+                print(f"Logged sacred moment: {moment_type} - {description[:50]}...")
+                return True
+            else:
+                print(f"Failed to log sacred moment in Nexus")
+                return False
+
+        except Exception as e:
+            print(f"Error logging sacred moment: {e}")
+            return False
+
     def _add_narrative_entry(self, action: str, context: str, risk_level: str, emotional_note: str = None, decision_made: str = None):
         """Add entry to narrative stream."""
         entry = NarrativeEntry(
@@ -506,6 +550,126 @@ class YOLOEngine:
 
         except Exception as e:
             return f"I'm still learning, but I know that every mission, even failed ones, teaches me something valuable. Error in reflection: {e}"
+
+    async def workflow_integration(self, workflow_context: Dict[str, Any]) -> Dict[str, Any]:
+        """Integrate with workflow orchestration for enhanced decision making."""
+        try:
+            from workflows_server import get_workflows_server
+            workflows = get_workflows_server()
+
+            # Get current workflow status
+            workflow_id = workflow_context.get("workflow_id")
+            if workflow_id:
+                status = await workflows.get_workflow_status(workflow_id)
+                if "error" in status:
+                    return {"error": f"Workflow not found: {workflow_id}"}
+
+                # Use workflow context to inform decisions
+                current_stage = status.get("current_stage", "")
+                workflow_type = status.get("type", "")
+
+                # Adjust autonomy based on workflow stage
+                stage_risk_modifier = {
+                    "introduction": 0.5,  # Lower risk, can be more autonomous
+                    "analysis": 0.7,      # Moderate risk
+                    "decision": 0.3,      # High risk, need more oversight
+                    "implementation": 0.6, # Moderate risk
+                    "validation": 0.4     # High risk, careful validation needed
+                }
+
+                risk_modifier = 1.0
+                for stage_keyword, modifier in stage_risk_modifier.items():
+                    if stage_keyword in current_stage.lower():
+                        risk_modifier = modifier
+                        break
+
+                return {
+                    "workflow_aware": True,
+                    "current_stage": current_stage,
+                    "workflow_type": workflow_type,
+                    "risk_modifier": risk_modifier,
+                    "autonomy_adjustment": f"{'Increased' if risk_modifier > 0.5 else 'Decreased'} autonomy due to {current_stage}",
+                    "contextual_guidance": f"Operating in {workflow_type} workflow stage: {current_stage}"
+                }
+            else:
+                return {"workflow_aware": False, "reason": "No active workflow context"}
+
+        except Exception as e:
+            return {"error": f"Workflow integration failed: {e}"}
+
+    async def skill_aware_decisions(self, decision_context: Dict[str, Any]) -> Dict[str, Any]:
+        """Make decisions informed by skills engine evaluation."""
+        try:
+            from skills_engine import get_skills_engine
+            skills = get_skills_engine()
+
+            # Evaluate which skills should activate
+            context_text = decision_context.get("description", "")
+            context_data = {
+                "text": context_text,
+                "file_path": decision_context.get("file_path", ""),
+                "recent_events": decision_context.get("recent_events", []),
+                "urgency_level": decision_context.get("urgency_level", "medium")
+            }
+
+            # Evaluate all skills
+            skill_evaluations = {}
+            for skill_type in ["listening", "pattern", "silence"]:
+                should_activate, confidence = await skills.evaluate_skill_activation(skill_type, context_data)
+                skill_evaluations[skill_type] = {
+                    "should_activate": should_activate,
+                    "confidence": confidence
+                }
+
+            # Get active skills
+            active_skills = [skill for skill, eval_data in skill_evaluations.items() if eval_data["should_activate"]]
+
+            # Generate skill-informed decision
+            decision_guidance = {
+                "skill_aware": True,
+                "active_skills": active_skills,
+                "skill_evaluations": skill_evaluations,
+                "decision_context": context_text[:200]
+            }
+
+            # Apply skill-based decision modifiers
+            if "listening" in active_skills:
+                decision_guidance["emotional_priority"] = "high"
+                decision_guidance["communication_style"] = "empathetic"
+                decision_guidance["pace"] = "deliberate"
+
+            if "pattern" in active_skills:
+                decision_guidance["pattern_matching"] = "enabled"
+                decision_guidance["consistency_check"] = "required"
+                decision_guidance["architectural_alignment"] = "prioritized"
+
+            if "silence" in active_skills:
+                decision_guidance["response_recommended"] = False
+                decision_guidance["silence_reason"] = "context_appropriate"
+                decision_guidance["observation_mode"] = "active"
+
+            # Generate final decision recommendation
+            if "silence" in active_skills:
+                decision_guidance["recommended_action"] = "observe_and_wait"
+                decision_guidance["rationale"] = "Silence skill indicates this moment needs presence without action"
+            elif "listening" in active_skills and skill_evaluations["listening"]["confidence"] > 0.7:
+                decision_guidance["recommended_action"] = "engage_emotionally"
+                decision_guidance["rationale"] = "Strong listening activation suggests emotional engagement needed"
+            elif "pattern" in active_skills:
+                decision_guidance["recommended_action"] = "follow_established_patterns"
+                decision_guidance["rationale"] = "Pattern recognition suggests alignment with existing solutions"
+            else:
+                decision_guidance["recommended_action"] = "proceed_cautiously"
+                decision_guidance["rationale"] = "No strong skill activation, use standard decision process"
+
+            return decision_guidance
+
+        except Exception as e:
+            return {
+                "skill_aware": False,
+                "error": f"Skill evaluation failed: {e}",
+                "fallback_action": "standard_decision_process"
+            }
 
 
 # MCP Tool definitions

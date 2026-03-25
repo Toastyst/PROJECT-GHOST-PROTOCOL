@@ -397,26 +397,26 @@ Fragments will accumulate until transmutation triggers. Use `/transmute` to manu
             return f"❌ Transmutation failed: {e}"
 
     async def on_message_autopoiesis(self, message: str) -> Optional[str]:
-        """Capture autopoiesis fragments from messages."""
+        """Capture autopoiesis fragments from messages using the harvester."""
         if not self.autopoiesis_active:
             return None
 
         try:
-            from autopoiesis import get_autopoiesis_engine
-            engine = get_autopoiesis_engine()
+            from fragment_harvester import get_fragment_harvester
+            harvester = get_fragment_harvester()
 
-            # Record activity for pause detection
+            # Use harvester for chat messages
             context = {
-                "source": "message",
+                "source": "cline_chat",
                 "content_length": len(message),
                 "timestamp": "2026-03-25T06:52:00"
             }
 
-            fragment = engine.observer.record_activity("message", message, context)
+            fragment = harvester.harvest_from_chat(message, context)
 
             if fragment:
                 # Fragment was captured
-                return f"🧬 **Fragment Captured:** {fragment.type} (weight: {fragment.emotional_weight})"
+                return f"🧬 **Fragment Captured:** {fragment.type} (weight: {fragment.emotional_weight}) from chat"
 
         except Exception as e:
             print(f"Autopoiesis message observation error: {e}")
@@ -424,24 +424,24 @@ Fragments will accumulate until transmutation triggers. Use `/transmute` to manu
         return None
 
     async def on_file_change_autopoiesis(self, file_path: str, change_type: str) -> Optional[str]:
-        """Capture autopoiesis fragments from file changes."""
+        """Capture autopoiesis fragments from file changes using the harvester."""
         if not self.autopoiesis_active:
             return None
 
         try:
-            from autopoiesis import get_autopoiesis_engine
-            engine = get_autopoiesis_engine()
+            from fragment_harvester import get_fragment_harvester
+            harvester = get_fragment_harvester()
 
-            # Record file activity
-            context = {
-                "file": file_path,
-                "change_type": change_type,
-                "timestamp": "2026-03-25T06:52:00"
-            }
+            # Read file content for analysis
+            content = ""
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+            except:
+                content = f"File {change_type}: {file_path}"
 
-            # Check for discovery patterns in file changes
-            activity_content = f"File {change_type}: {file_path}"
-            fragment = engine.observer.record_activity("file_change", activity_content, context)
+            # Use harvester for file edits
+            fragment = harvester.harvest_from_file_edit(file_path, content, change_type)
 
             if fragment:
                 return f"🧬 **Fragment Captured:** {fragment.type} from {file_path}"

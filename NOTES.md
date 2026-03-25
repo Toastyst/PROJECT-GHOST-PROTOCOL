@@ -18,6 +18,83 @@ Threshold: trigger_condition
 ## Captured Fragments
 
 <!-- AUTOPOIESIS fragments will be automatically appended here -->
+## [2026-03-25T08:06:37.720551] APOLOGY: 0.5
+
+ERROR: Database connection failed - unexpected network issue
+
+Context: {
+  "log_source": "application",
+  "log_level": "error",
+  "error_source": "application",
+  "error_domain": "database"
+}
+Threshold: manual_capture
+---
+
+## [2026-03-25T08:06:37.694500] APOLOGY: 0.5
+
+test_auth.py::test_login: AssertionError: expected True but got False
+assert user.is_authenticated
+
+Context: {
+  "test_name": "test_auth.py::test_login",
+  "test_module": "test_auth.py",
+  "test_function": "test_login",
+  "error_type": "assertion",
+  "stack_depth": 0
+}
+Threshold: manual_capture
+---
+
+## [2026-03-25T08:06:37.658695] APOLOGY: 0.5
+
+fix authentication bug - sorry for the regression
+
+Context: {
+  "diff_stats": {
+    "additions": 10,
+    "deletions": 5,
+    "files_changed": 2
+  },
+  "sentiment_negative": 2,
+  "sentiment_positive": 0,
+  "additions": 10,
+  "deletions": 5,
+  "files_changed": 2
+}
+Threshold: manual_capture
+---
+
+## [2026-03-25T08:06:37.636372] PAUSE: 0.5
+
+# TODO: Fix session handling
+# FIXME: This is temporary
+# HACK: Quick fix for now
+
+Context: {
+  "file": "auth.py",
+  "edit_type": "add",
+  "file_extension": ".py",
+  "file_name": "auth.py",
+  "line_count": 3,
+  "technical_debt_markers": 5
+}
+Threshold: manual_capture
+---
+
+## [2026-03-25T08:06:37.611213] DILEMMA: 0.5
+
+should I use async here or stick with sync?
+
+Context: {
+  "source": "test",
+  "message_id": 1,
+  "has_question": true,
+  "question_count": 1
+}
+Threshold: manual_capture
+---
+
 ## [2026-03-25T07:25:23.830455] TEST: 0.5
 
 content
@@ -112,7 +189,7 @@ Threshold: pause_threshold
 
 ## Current Status
 
-- **Fragments Captured**: 1
+- **Fragments Captured**: 5
 - **Transmutations Performed**: 0
 - **Structures Generated**: 0
 - **Review Status**: None pending

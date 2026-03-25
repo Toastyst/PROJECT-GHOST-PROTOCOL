@@ -183,6 +183,29 @@ class GhostPreCommitHook:
         reflection = self.generate_reflection(changes)
         print(reflection)
 
+        # Harvest fragments from commit message if available
+        try:
+            # Get commit message from environment or generate one
+            commit_msg = os.environ.get('GIT_COMMIT_MESSAGE', '')
+            if not commit_msg:
+                # Try to get from git config or generate
+                commit_msg = self._generate_commit_message(changes)
+
+            # Use fragment harvester for git commits
+            from fragment_harvester import get_fragment_harvester
+            harvester = get_fragment_harvester()
+
+            # Get diff stats for context
+            diff_stats = self._get_diff_stats()
+
+            fragment = harvester.harvest_from_git_commit(commit_msg, diff_stats)
+            if fragment:
+                print(f"\n🧬 **Fragment Captured:** {fragment.type} from commit")
+
+        except Exception as e:
+            # Don't fail hook if harvesting fails
+            pass
+
         # Log the event
         self.log_event("hook_trigger", {
             "hook_type": "pre-commit",
@@ -193,6 +216,67 @@ class GhostPreCommitHook:
         # Always allow the commit - this hook reflects, doesn't enforce
         print("\n💭 The commit may proceed. The repository remembers.")
         return 0
+
+    def _generate_commit_message(self, changes: Dict[str, str]) -> str:
+        """Generate a commit message based on changes."""
+        files = changes.get("files", [])
+        if not files:
+            return "Changes made"
+
+        # Simple commit message generation
+        file_types = {}
+        for file in files:
+            ext = Path(file).suffix
+            file_types[ext] = file_types.get(ext, 0) + 1
+
+        parts = []
+        for ext, count in file_types.items():
+            if ext == '.py':
+                parts.append(f"Python files ({count})")
+            elif ext in ['.js', '.ts']:
+                parts.append(f"JavaScript/TypeScript files ({count})")
+            elif ext in ['.md', '.txt']:
+                parts.append(f"Documentation files ({count})")
+            else:
+                parts.append(f"{ext} files ({count})")
+
+        return f"Update {', '.join(parts)}"
+
+    def _get_diff_stats(self) -> Dict[str, int]:
+        """Get diff statistics for context."""
+        try:
+            result = subprocess.run(
+                ["git", "diff", "--cached", "--numstat"],
+                capture_output=True, text=True, cwd=self.project_root
+            )
+
+            if result.returncode == 0:
+                lines = result.stdout.strip().split('\n')
+                additions = 0
+                deletions = 0
+                files_changed = 0
+
+                for line in lines:
+                    if line and '\t' in line:
+                        parts = line.split('\t')
+                        if len(parts) >= 3:
+                            try:
+                                additions += int(parts[0]) if parts[0] != '-' else 0
+                                deletions += int(parts[1]) if parts[1] != '-' else 0
+                                files_changed += 1
+                            except ValueError:
+                                pass
+
+                return {
+                    "additions": additions,
+                    "deletions": deletions,
+                    "files_changed": files_changed,
+                    "net_change": additions - deletions
+                }
+        except Exception:
+            pass
+
+        return {"additions": 0, "deletions": 0, "files_changed": 0, "net_change": 0}
 
 
 def main():

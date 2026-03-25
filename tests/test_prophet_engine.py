@@ -8,10 +8,10 @@ behavioral tracking, diffusion forecasting, and meta-cognition.
 import pytest
 import json
 from unittest.mock import Mock, patch, MagicMock
-from models import Prediction, BehavioralModel, ConstitutionalPrinciple, ForecastingAgent as ForecastingAgentModel, SwarmConsensus, DiffusionForecast
-from prophet_engine import ProphetEngine, ForecastingAgent, SwarmCoordinator, ConstitutionalReviewer
-from utils import BehavioralAnalyzer, DiffusionForecaster
-from autopoiesis import get_autopoiesis_engine
+from src.ghost_protocol.models.models import Prediction, BehavioralModel, ConstitutionalPrinciple, ForecastingAgent as ForecastingAgentModel, SwarmConsensus, DiffusionForecast
+from src.ghost_protocol.engines.prophet_engine import ProphetEngine, ForecastingAgent, SwarmCoordinator, ConstitutionalReviewer
+from src.ghost_protocol.utils.utils import BehavioralAnalyzer, DiffusionForecaster
+from src.ghost_protocol.engines.autopoiesis import get_autopoiesis_engine
 
 
 class TestProphetEngine:
@@ -432,7 +432,7 @@ class TestProphetIntegration:
 
     def test_full_prophecy_workflow(self):
         """Test complete prophecy workflow."""
-        from prophet_engine import initialize_prophet_engine
+        from src.ghost_protocol.engines.prophet_engine import initialize_prophet_engine
 
         engine = initialize_prophet_engine()
 
@@ -447,7 +447,7 @@ class TestProphetIntegration:
 
     def test_behavioral_tracking_integration(self):
         """Test behavioral tracking integration."""
-        from utils import capture_behavioral_fragment
+        from src.ghost_protocol.utils.utils import capture_behavioral_fragment
 
         # This would require consent in real usage
         # For testing, mock the consent check

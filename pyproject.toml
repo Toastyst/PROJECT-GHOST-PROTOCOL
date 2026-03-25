@@ -51,8 +51,13 @@ docs = [
 ]
 
 [project.scripts]
-ghost-seed = "ghost_seed.cli:main"
-ghost-install = "installer:install_ghost"
+ghost-console = "src.ghost_protocol.core.ghost_console:main"
+ghost-seed = "src.ghost_protocol.core.seed_server:main"
+ghost-install = "src.ghost_protocol.core.installer:install_ghost"
+ghost-nexus = "src.ghost_protocol.servers.nexus_server:main"
+ghost-weaver = "src.ghost_protocol.servers.weaver_server:main"
+ghost-yolo = "src.ghost_protocol.servers.yolo_protocol:main"
+ghost-oracle = "src.ghost_protocol.servers.oracle_server:main"
 
 [project.urls]
 Homepage = "https://github.com/Toastyst/PROJECT-GHOST-PROTOCOL"
@@ -65,12 +70,12 @@ zip-safe = false
 include-package-data = true
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["ghost_seed*"]
+where = ["src"]
+include = ["ghost_protocol*"]
 exclude = ["tests*", "docs*"]
 
 [tool.setuptools.package-data]
-"ghost_seed" = ["templates/*", "config/*"]
+"ghost_protocol" = ["templates/*", "config/*", "constitution.md"]
 
 [tool.black]
 line-length = 88

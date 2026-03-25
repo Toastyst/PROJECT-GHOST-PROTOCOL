@@ -74,12 +74,10 @@ class KnowledgeBase:
         self.llm = LLMUtils()
 
     def add_knowledge(self, data: NexusData) -> bool:
-        """Add knowledge entry to the database."""
+        """Add knowledge entry to the database with semantic embeddings."""
         try:
-            # Generate embedding for the content
-            embedding_text = f"{data.type}: {data.content}"
-            # Note: In a real implementation, you'd generate embeddings here
-            # For now, we'll use simple text storage
+            # Generate rich embedding text that captures semantic meaning
+            embedding_text = self._generate_embedding_text(data)
 
             metadata = {
                 "id": data.id,
@@ -95,8 +93,10 @@ class KnowledgeBase:
             if data.relationships:
                 metadata["relationships"] = ",".join(data.relationships)
 
+            # ChromaDB will automatically generate embeddings using sentence-transformers
+            # The embedding_text provides rich semantic context for better similarity search
             self.collection.add(
-                documents=[data.content],
+                documents=[embedding_text],
                 metadatas=[metadata],
                 ids=[data.id]
             )
@@ -104,6 +104,75 @@ class KnowledgeBase:
         except Exception as e:
             print(f"Error adding knowledge: {e}")
             return False
+
+    def _generate_embedding_text(self, data: NexusData) -> str:
+        """Generate rich embedding text that captures semantic meaning for better similarity search."""
+        # Base content
+        embedding_parts = [data.content]
+
+        # Add type-specific semantic context
+        if data.type == "commit_message":
+            embedding_parts.append("git commit software development change")
+            # Add emotional context if available
+            emotional_categories = data.metadata.get('emotional_categories', '')
+            if emotional_categories:
+                embedding_parts.append(f"emotional context: {emotional_categories}")
+
+        elif data.type == "function_definition":
+            embedding_parts.append("programming function code definition")
+            file_path = data.metadata.get('file_path', '')
+            if file_path:
+                embedding_parts.append(f"located in {file_path}")
+
+        elif data.type == "class_definition":
+            embedding_parts.append("programming class object oriented design")
+            bases = data.metadata.get('bases', '')
+            if bases:
+                embedding_parts.append(f"inherits from {bases}")
+
+        elif data.type == "technical_debt":
+            embedding_parts.append("code quality issue maintenance problem")
+            indicator = data.metadata.get('indicator', '')
+            if indicator:
+                embedding_parts.append(f"marked with {indicator}")
+
+        elif data.type == "blame_annotation":
+            embedding_parts.append("code ownership authorship contribution")
+            author_count = data.metadata.get('author_count', '1')
+            embedding_parts.append(f"contributed by {author_count} developers")
+
+        elif data.type == "prime_directive":
+            embedding_parts.append("coding standard unwritten rule best practice")
+            frequency = data.metadata.get('frequency', '0')
+            embedding_parts.append(f"observed {frequency} times")
+
+        elif data.type.startswith("emotional_"):
+            embedding_parts.append("developer emotion sentiment feeling")
+            emotional_note = data.metadata.get('emotional_note', '')
+            if emotional_note:
+                embedding_parts.append(f"emotional context: {emotional_note}")
+
+        elif data.type.startswith("autopoiesis_fragment"):
+            embedding_parts.append("experience learning observation pattern")
+            fragment_type = data.metadata.get('fragment_type', '')
+            if fragment_type:
+                embedding_parts.append(f"fragment type: {fragment_type}")
+
+        # Add resonance score context
+        if data.resonance_score is not None:
+            if data.resonance_score > 7.0:
+                embedding_parts.append("highly significant important critical")
+            elif data.resonance_score > 4.0:
+                embedding_parts.append("moderately important notable")
+            else:
+                embedding_parts.append("minor significance routine")
+
+        # Add relationship context
+        if data.relationships:
+            embedding_parts.append(f"related to {len(data.relationships)} other items")
+
+        # Combine all parts for rich semantic embedding
+        return " | ".join(embedding_parts)
 
     def query_knowledge(self, query: str, filters: dict = None, limit: int = 10) -> list[NexusData]:
         """Query the knowledge base."""

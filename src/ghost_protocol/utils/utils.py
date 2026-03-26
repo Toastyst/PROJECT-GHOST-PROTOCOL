@@ -304,7 +304,22 @@ class LLMUtils:
     @staticmethod
     def _call_llm(provider, messages, **kwargs):
         """Call LLM for a specific provider."""
-        if provider.startswith("openai/"):
+        if provider == "mock":
+            # Use mock LLM for testing
+            from src.ghost_protocol.utils.mock_llm import get_mock_llm
+            mock_llm = get_mock_llm()
+            content = mock_llm.generate_with_reasoning(messages[0]['content'])
+            class MockMessage:
+                def __init__(self, content):
+                    self.content = content
+            class MockChoice:
+                def __init__(self, content):
+                    self.message = MockMessage(content)
+            class MockResponse:
+                def __init__(self, content):
+                    self.choices = [MockChoice(content)]
+            return MockResponse(content)
+        elif provider.startswith("openai/"):
             from openai import OpenAI
             model = provider.split("/", 1)[1]
             client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -314,24 +329,12 @@ class LLMUtils:
             model = provider.split("/", 1)[1]
             client = OpenAI(api_key=os.getenv("GROK_API_KEY"), base_url="https://api.x.ai/v1")
             return client.chat.completions.create(model=model, messages=messages, **kwargs)
-        elif provider.startswith("mock/"):
-            # Mock response for testing
-            content = f"Mock response for: {messages[0]['content'][:100]}..."
-            class MockMessage:
-                def __init__(self):
-                    self.content = content
-            class MockChoice:
-                def __init__(self):
-                    self.message = MockMessage()
-            class MockResponse:
-                def __init__(self):
-                    self.choices = [MockChoice()]
-            return MockResponse()
         else:
             raise ValueError(f"Unsupported provider: {provider}")
 
     def __init__(self):
-        Config.validate()
+        if not Config.TEST_MODE:
+            Config.validate()
 
     def generate_code(self, prompt: str, context: str = "") -> str:
         """Generate code using LLM with fallback support."""

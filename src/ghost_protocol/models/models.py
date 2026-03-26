@@ -29,6 +29,7 @@ class YOLOMission(BaseModel):
     checkpoints: List[str]  # decision points requiring oversight
     constraints: List[str]  # hard boundaries
     success_criteria: List[str]  # completion measures
+    emotional_payload: Optional[Dict[str, Any]] = {}
 
 
 class CodeDelta(BaseModel):

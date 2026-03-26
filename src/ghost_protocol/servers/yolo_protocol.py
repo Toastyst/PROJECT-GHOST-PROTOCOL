@@ -787,8 +787,8 @@ class YOLOEngine:
 
             # Store in Nexus for long-term memory
             from src.ghost_protocol.models.models import NexusData
-            nexus_data = NexusData(**sacred_entry)
-            success = await self.nexus.knowledge_base.add_knowledge(nexus_data)
+            nexus_data = NexusData(**knowledge)
+            success = self.nexus.knowledge_base.add_knowledge(nexus_data)
 
             if success:
                 print(f"Logged sacred moment: {moment_type} - {description[:50]}...")

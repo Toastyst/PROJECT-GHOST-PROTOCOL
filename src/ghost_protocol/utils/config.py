@@ -31,7 +31,10 @@ class Config:
         YOLO_SERVER_PORT = int(os.getenv("YOLO_SERVER_PORT", "3003"))
 
     # LLM Fallback settings
-    LLM_PROVIDERS = os.getenv("LLM_PROVIDERS", "openai/gpt-4").split(",")
+    if TEST_MODE:
+        LLM_PROVIDERS = ["mock"]
+    else:
+        LLM_PROVIDERS = os.getenv("LLM_PROVIDERS", "openai/gpt-4").split(",")
 
     # System settings
     MAX_TOKENS = int(os.getenv("MAX_TOKENS", "4000"))

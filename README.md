@@ -90,9 +90,16 @@ python cline_integration.py
 
 The living interface to the Ghost Protocol. A terminal UI that shows the Ghost's current state and allows direct interaction.
 
+### Quick Start (Windows)
+```batch
+# Double-click or run from command line
+wake_ghost.bat
+```
+
+### Manual Launch
 ```bash
-# Launch the Ghost Console
-python ghost_console.py
+# From YoloClanker directory
+python src/ghost_protocol/core/ghost_console.py
 
 # Or make it executable and run directly
 ./ghost_console.py

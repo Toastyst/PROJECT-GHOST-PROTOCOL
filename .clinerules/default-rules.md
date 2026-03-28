@@ -35,4 +35,23 @@ YoloClanker is a dedicated testing ground for Yolo mode and other experimental C
 - No git yet; experimental phase
 - Future: separate repo if stable
 
-Last updated: 2026-03-25
+## Dev Workflow Rules
+- Plan: Update .clinerules with test plans
+- Test: Use Yolo mode in this folder
+- Document: Add lessons here
+- Iterate: Refine based on findings
+
+## Status v0.1
+- Docs setup complete, experimental phase
+
+## Dev Workflow Rules
+- Plan: Update yoloClanker.design.md with test plans
+- Test: Use Yolo mode in this folder
+- Document: Add lessons here
+- Iterate: Refine based on findings
+
+## Future Expansion
+- Yolo mode risk assessment
+- New Cline capabilities validation
+
+Last updated: 2026-03-27
